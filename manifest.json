@@ -1,0 +1,27 @@
+{
+  "name": "赛博神殿",
+  "short_name": "赛博神殿",
+  "description": "赛博朋克风格祈福应用，财神·月老·天公，一键祈福",
+  "start_url": "cyber-caishen.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#03030f",
+  "theme_color": "#FFD700",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "categories": ["lifestyle", "entertainment"]
+}
