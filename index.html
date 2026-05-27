@@ -2,10 +2,32 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>赛博神殿 · CyberTemple</title>
+<meta name="description" content="赛博朋克风格祈福应用，财神·月老·天公，一键祈福">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FFD700">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="赛博神殿">
+<link rel="apple-touch-icon" href="icon-192.svg">
+
 <meta http-equiv="refresh" content="0; url=cyber-caishen.html">
-<title>赛博神殿</title>
+<style>
+  body { background: #03030f; display:flex; align-items:center; justify-content:center; height:100vh; margin:0; }
+  p { color: #FFD700; font-family: serif; font-size: 20px; letter-spacing: 4px; }
+</style>
 </head>
 <body>
-<script>window.location.replace('cyber-caishen.html');</script>
+<p>⛩️ 赛博神殿 载入中...</p>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+  setTimeout(() => window.location.replace('cyber-caishen.html'), 300);
+</script>
 </body>
 </html>
