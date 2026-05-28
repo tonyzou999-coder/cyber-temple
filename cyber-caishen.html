@@ -2091,39 +2091,40 @@ document.addEventListener('keydown', e => {
 // 命盘系统 · 五行推荐算法
 // =====================================================
 
-// 五行：木火土金水 对应数字 0-4
-// 天干五行映射
-const TIANGAN_WX = [2,3,2,3,4,4,0,0,1,1]; // 甲乙丙丁戊己庚辛壬癸
-// 地支五行映射
-const DIZHI_WX = [2,1,2,4,3,3,4,0,0,1,1,2]; // 子丑寅卯辰巳午未申酉戌亥
+// 五行：木0 火1 土2 金3 水4
+const TIANGAN_WX = [0,0,1,1,2,2,3,3,4,4]; // 甲乙丙丁戊己庚辛壬癸
+const DIZHI_WX   = [4,2,0,0,2,1,1,2,3,3,2,4]; // 子丑寅卯辰巳午未申酉戌亥
 
-// 五行名称
 const WX_NAME = ['木','火','土','金','水'];
+const WX_EMOJI_MAP = ['🌿','🔥','🟤','✨','💧'];
 
-// 五行对应神明 id（一个五行可对应多个神明优先级）
+// 五行对应神明
 const WX_TO_DEITY = {
-  0: 'wenchang',  // 木 → 文昌（文教、生长）
-  1: 'taibai',    // 火 → 太白（事业、光明）
-  2: 'tiangong',  // 土 → 天公（大地、顺遂）
-  3: 'caishen',   // 金 → 财神（财富、金属）
-  4: 'yuelao',    // 水 → 月老（姻缘、流动）
+  0: 'wenchang',
+  1: 'taibai',
+  2: 'tiangong',
+  3: 'caishen',
+  4: 'yuelao',
 };
 
-// 五行缺陷对应含义
-const WX_LACK_REASON = {
-  0: { lack: '命中缺木，今日木旺', detail: '宜求文昌帝君，助文思大开、智慧增长' },
-  1: { lack: '命中缺火，今日火旺', detail: '宜求太白金星，助事业腾飞、职场高升' },
-  2: { lack: '命中缺土，今日土旺', detail: '宜求天公，祈万事顺遂、四季平安' },
-  3: { lack: '命中缺金，今日金旺', detail: '宜求财神爷，祈财运亨通、金银滚滚' },
-  4: { lack: '命中缺水，今日水旺', detail: '宜求月老，求姻缘红线、桃花喜缘' },
+// 五行神明对应职能
+const WX_DEITY_DESC = {
+  0: { name: '文昌帝君', domain: '文思智慧、学业事业' },
+  1: { name: '太白金星', domain: '事业腾飞、职场高升' },
+  2: { name: '天公',     domain: '万事顺遂、四季平安' },
+  3: { name: '财神爷',   domain: '财运亨通、金银滚滚' },
+  4: { name: '月老',     domain: '姻缘红线、桃花喜缘' },
 };
 
-// 欧皇娘娘特殊触发：生日为今天月日 or 名字含"福/旺/欧"
+// 五行相生：生[i] = i所生的五行（木生火，火生土，土生金，金生水，水生木）
+const WX_SHENG = [1, 2, 3, 4, 0]; // index=源，值=被生
+// 五行相克：克[i] = i所克的五行（木克土，火克金，土克水，金克木，水克火）
+const WX_KE = [2, 3, 4, 0, 1];
+
+// 欧皇娘娘特殊触发
 function checkOuhuang(name, birthDate) {
   const today = new Date();
-  const bm = birthDate.getMonth();
-  const bd = birthDate.getDate();
-  if (bm === today.getMonth() && bd === today.getDate()) return true;
+  if (birthDate.getMonth() === today.getMonth() && birthDate.getDate() === today.getDate()) return true;
   if (/[福旺欧运吉]/u.test(name)) return true;
   return false;
 }
@@ -2131,10 +2132,7 @@ function checkOuhuang(name, birthDate) {
 // 药王特殊触发：出生月日与今日月日差 ≤7天
 function checkYaowang(birthDate) {
   const today = new Date();
-  // 取今年的生日日期来比较
   const thisYearBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
-  const diffDaysYaowang = Math.abs(today - thisYearBirthday) / 86400000;
-  // 也考虑去年/明年生日
   const prevYearBirthday = new Date(today.getFullYear() - 1, birthDate.getMonth(), birthDate.getDate());
   const nextYearBirthday = new Date(today.getFullYear() + 1, birthDate.getMonth(), birthDate.getDate());
   const minDiff = Math.min(
@@ -2145,50 +2143,89 @@ function checkYaowang(birthDate) {
   return minDiff <= 7;
 }
 
-/**
- * 根据出生日期计算生辰八字中的五行缺失（简化版：只用年柱+月柱）
- * 返回缺失五行数组（取数量最少的）
- */
+// 计算命中缺失五行（返回数组，最少的）
 function calcLackingWuxing(birthDate) {
   const year = birthDate.getFullYear();
   const month = birthDate.getMonth() + 1;
-
-  // 年干支
-  const yearStem = (year - 4) % 10;
-  const yearBranch = (year - 4) % 12;
-
-  // 月干支（粗略：以实际月份地支为准，干根据年推）
-  const monthBranchIndex = (month + 1) % 12; // 寅月为正月，index=2 映射
-  const monthStem = ((year - 4) % 5 * 2 + (month - 1)) % 10;
-
-  // 日柱（以出生年月日的总天数推算）
-  const baseDate = new Date(1900, 0, 31); // 庚子年甲辰日基准
+  const yearStem = ((year - 4) % 10 + 10) % 10;
+  const yearBranch = ((year - 4) % 12 + 12) % 12;
+  const monthBranchIndex = (month + 1) % 12;
+  const monthStem = (((year - 4) % 5 + 5) % 5 * 2 + (month - 1)) % 10;
+  const baseDate = new Date(1900, 0, 31);
   const diffDays = Math.floor((birthDate - baseDate) / 86400000);
   const dayStem = ((diffDays % 10) + 10) % 10;
   const dayBranch = ((diffDays % 12) + 12) % 12;
-
-  // 统计五行出现次数（年柱+月柱+日柱，各天干+地支）
   const wxCount = [0, 0, 0, 0, 0];
   [yearStem, monthStem, dayStem].forEach(s => wxCount[TIANGAN_WX[s]]++);
   [yearBranch, monthBranchIndex, dayBranch].forEach(b => wxCount[DIZHI_WX[b]]++);
-
-  // 找数量最少的五行
   const minVal = Math.min(...wxCount);
-  const lacking = wxCount.map((v, i) => v === minVal ? i : -1).filter(i => i >= 0);
-  return lacking;
+  return wxCount.map((v, i) => v === minVal ? i : -1).filter(i => i >= 0);
 }
 
-/**
- * 今日日期加权：根据今日农历/公历日期影响推荐
- * 简化：用 (月+日) mod 5 作为今日旺盛五行偏移
- */
+// 今日旺盛五行：(月+日) mod 5
 function getTodayBoostWuxing() {
   const t = new Date();
   return (t.getMonth() + t.getDate()) % 5;
 }
 
 /**
- * 综合算法：推荐神明
+ * 根据命中所缺五行 + 今日旺盛五行，计算推荐理由
+ * 逻辑：
+ *   1. 今日旺 = 命中缺 → 今日正是补缺最佳时机（直接旺）
+ *   2. 今日旺 生 命中缺 → 今日天时助力，借势补缺（相生）
+ *   3. 今日旺 克 命中缺 → 今日天时压制所缺，更需神明护体（相克急）
+ *   4. 其他         → 命盘本缺，宜借神明之力填补（普通缺）
+ */
+function buildReason(lacking, todayBoost) {
+  const todayName = WX_NAME[todayBoost];
+  const todayEmoji = WX_EMOJI_MAP[todayBoost];
+
+  // 优先：今日旺正是命中所缺
+  if (lacking.includes(todayBoost)) {
+    const desc = WX_DEITY_DESC[todayBoost];
+    return {
+      chosen: todayBoost,
+      reason: `⚡ 命中缺${WX_NAME[todayBoost]}，今日${todayEmoji}${todayName}旺`,
+      detail: `天时与命盘共鸣，今日是祈求${desc.name}的绝佳时机，宜${desc.domain}`
+    };
+  }
+
+  // 今日旺 生 某缺失五行 → 借势
+  for (const lack of lacking) {
+    if (WX_SHENG[todayBoost] === lack) {
+      const desc = WX_DEITY_DESC[lack];
+      return {
+        chosen: lack,
+        reason: `✨ 命中缺${WX_NAME[lack]}，今日${todayEmoji}${todayName}旺生${WX_NAME[lack]}`,
+        detail: `今日${todayName}气旺盛，五行相生助力，借势祈求${desc.name}，事半功倍，宜${desc.domain}`
+      };
+    }
+  }
+
+  // 今日旺 克 某缺失五行 → 急需护体
+  for (const lack of lacking) {
+    if (WX_KE[todayBoost] === lack) {
+      const desc = WX_DEITY_DESC[lack];
+      return {
+        chosen: lack,
+        reason: `🔺 命中缺${WX_NAME[lack]}，今日${todayEmoji}${todayName}旺克${WX_NAME[lack]}`,
+        detail: `今日${todayName}气克压所缺，命中${WX_NAME[lack]}气更显不足，急需${desc.name}护体，宜${desc.domain}`
+      };
+    }
+  }
+
+  // 默认：命中缺，宜补
+  const lack = lacking[0];
+  const desc = WX_DEITY_DESC[lack];
+  return {
+    chosen: lack,
+    reason: `⚡ 命中缺${WX_NAME[lack]}，${desc.name}感应`,
+    detail: `命盘五行${WX_NAME[lack]}气不足，宜借${desc.name}之力填补，祈${desc.domain}`
+  };
+}
+
+/**
+ * 综合推荐算法
  */
 function recommendDeity(name, birthDate) {
   // 特殊触发优先
@@ -2202,32 +2239,19 @@ function recommendDeity(name, birthDate) {
   if (checkYaowang(birthDate)) {
     return {
       deityId: 'yaowang',
-      reason: '🌿 药王本月与你生月相合',
-      detail: '生月与今月同行，药王特感应，宜求护体强身、百毒不侵'
+      reason: '🌿 生辰将近，药王特感应',
+      detail: '出生月日与今日相近，药王感召，宜求护体强身、百毒不侵'
     };
   }
 
-  // 五行缺失计算
   const lacking = calcLackingWuxing(birthDate);
   const todayBoost = getTodayBoostWuxing();
+  const { chosen, reason, detail } = buildReason(lacking, todayBoost);
 
-  // 优先选今日旺且命中缺的五行
-  let chosen = lacking.includes(todayBoost) ? todayBoost : lacking[0];
-
-  // 用姓名笔画数微调（取名字第一个字的Unicode码模5）
-  if (name && name.length > 0) {
-    const charCode = name.charCodeAt(0);
-    const nameWx = charCode % 5;
-    // 如果名字五行也缺失，优先
-    if (lacking.includes(nameWx)) chosen = nameWx;
-  }
-
-  const deityId = WX_TO_DEITY[chosen];
-  const wxInfo = WX_LACK_REASON[chosen];
   return {
-    deityId,
-    reason: `⚡ ${wxInfo.lack}`,
-    detail: wxInfo.detail
+    deityId: WX_TO_DEITY[chosen],
+    reason,
+    detail
   };
 }
 
@@ -2404,9 +2428,6 @@ function initUserSystem() {
 
 // 今日五行旺色
 const WX_COLOR = ['#00C853','#FF4444','#D4A84B','#E8D5A3','#00BFFF'];
-const WX_BG_COLOR = ['rgba(0,200,83,0.25)','rgba(255,68,68,0.25)','rgba(212,168,75,0.25)','rgba(232,213,163,0.25)','rgba(0,191,255,0.25)'];
-const WX_LABEL = ['木','火','土','金','水'];
-const WX_EMOJI = ['🌿','🔥','🟤','✨','💧'];
 
 function showTodayWuxingBar() {
   const todayBoost = getTodayBoostWuxing();
@@ -2414,9 +2435,11 @@ function showTodayWuxingBar() {
   const dot = document.getElementById('todayWxDot');
   const text = document.getElementById('todayWxText');
 
+  const todayName = WX_NAME[todayBoost];
+  const todayEmoji = WX_EMOJI_MAP[todayBoost];
   dot.style.backgroundColor = WX_COLOR[todayBoost];
   dot.style.color = WX_COLOR[todayBoost];
-  text.textContent = `今日${WX_EMOJI[todayBoost]} ${WX_LABEL[todayBoost]}旺 · 宜拜${DEITIES.find(d=>d.id===WX_TO_DEITY[todayBoost])?.name || ''}`;
+  text.textContent = `今日 ${todayEmoji} ${todayName}旺`;
 
   bar.style.display = 'block';
 }
