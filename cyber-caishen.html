@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>赛博神殿 · CyberTemple</title>
 
+<!-- 字体预加载（防FOIT） -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&display=swap" rel="stylesheet">
+
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#FFD700">
@@ -383,16 +388,6 @@
   }
 
   /* ===== 祈福按键 ===== */
-  .btn-worship {
-    position: relative;
-    width: 190px;
-    height: 60px;
-    border: none;
-    cursor: pointer;
-    outline: none;
-    background: transparent;
-    -webkit-tap-highlight-color: transparent;
-  }
 
   .btn-bg {
     position: absolute;
@@ -659,7 +654,10 @@
 
   /* ===== 今日推荐 Banner ===== */
   #recommend-banner {
-    display: none;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0.6s;
     width: 100%;
     max-width: 420px;
     position: relative;
@@ -668,16 +666,11 @@
     padding: 0 16px;
   }
 
-  .rec-card {
-    background: rgba(0,0,0,0.5);
-    border: 1px solid var(--rec-color, rgba(255,215,0,0.35));
-    border-radius: 14px;
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: relative;
-    overflow: hidden;
+  #recommend-banner.visible {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0s;
   }
 
   .rec-card::before {
@@ -734,6 +727,147 @@
     letter-spacing: 0.3px;
   }
 
+  /* ===== 分享按钮 ===== */
+  #share-btn {
+    display: none;
+    position: fixed;
+    bottom: 88px;
+    right: 16px;
+    z-index: 200;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid var(--deity-primary);
+    border-radius: 24px;
+    color: var(--deity-primary);
+    font-size: 12px;
+    padding: 8px 16px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    font-family: 'Noto Serif SC', serif;
+    box-shadow: 0 0 12px var(--deity-glow);
+    transition: all 0.25s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #share-btn:hover { transform: scale(1.06); }
+  #share-btn:active { transform: scale(0.94); }
+
+  .share-card-logo { font-size: 36px; margin-bottom: 6px; }
+  .share-card-site {
+    font-size: 10px; letter-spacing: 4px;
+    color: var(--deity-secondary); opacity: 0.7; margin-bottom: 14px;
+  }
+  .share-card-deity {
+    font-size: 26px; font-weight: 900;
+    color: var(--deity-primary);
+    text-shadow: 0 0 16px var(--deity-glow);
+    letter-spacing: 3px; margin-bottom: 6px;
+  }
+  .share-card-reason {
+    font-size: 13px; color: rgba(255,255,255,0.8);
+    line-height: 1.7; letter-spacing: 0.5px; margin-bottom: 4px;
+  }
+  .share-card-detail {
+    font-size: 11px; color: rgba(255,255,255,0.5);
+    line-height: 1.6; margin-bottom: 16px;
+  }
+  .share-card-blessing {
+    font-size: 15px; font-weight: 700;
+    color: var(--deity-primary);
+    text-shadow: 0 0 10px var(--deity-glow);
+    line-height: 1.6; margin-bottom: 18px;
+    padding: 12px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px solid var(--deity-border);
+  }
+  .share-card-footer {
+    font-size: 10px; letter-spacing: 2px;
+    color: rgba(255,255,255,0.25); margin-bottom: 18px;
+  }
+  .share-card-btns { display: flex; gap: 10px; }
+  .share-card-btns button {
+    flex: 1; height: 44px; border: none; border-radius: 22px;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    font-family: 'Noto Serif SC', serif; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s;
+  }
+  .share-card-btns button:active { transform: scale(0.94); }
+  .share-copy-btn {
+    background: var(--deity-btn-bg);
+    color: var(--deity-primary);
+    box-shadow: 0 0 14px var(--deity-glow);
+  }
+  .share-close-btn {
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.55);
+    border: 1px solid rgba(255,255,255,0.15) !important;
+  }
+
+  /* ===== PWA 安装提示条 ===== */
+  #install-bar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 9999;
+    background: linear-gradient(135deg, #1a0a00, #0a0a1a);
+    border-top: 1px solid rgba(255,215,0,0.4);
+    padding: 12px 16px;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 -4px 20px rgba(255,215,0,0.15);
+  }
+  #install-bar-icon { font-size: 22px; }
+  #install-bar-text { flex: 1; font-family: sans-serif; }
+  #install-bar-text-main {
+    color: #FFD700;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  #install-bar-text-sub {
+    color: rgba(255,255,255,0.5);
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  #install-btn {
+    background: linear-gradient(135deg, #8B0000, #FF2D55);
+    color: #FFD700;
+    border: 1px solid #FFD700;
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    font-family: 'Noto Serif SC', serif;
+    transition: transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #install-btn:active { transform: scale(0.94); }
+  #install-close {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.3);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #install-close:hover { color: rgba(255,255,255,0.6); }
+  @keyframes count-bounce {
+    0%   { transform: translateX(-50%) scale(1); }
+    40%  { transform: translateX(-50%) scale(1.35); }
+    70%  { transform: translateX(-50%) scale(0.92); }
+    100% { transform: translateX(-50%) scale(1); }
+  }
+  .count-bounce {
+    animation: count-bounce 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  }
+
   .rec-user-name {
     font-size: 10px;
     letter-spacing: 1px;
@@ -776,7 +910,7 @@
   /* ===== 修改信息按钮 ===== */
   #edit-profile-btn {
     position: fixed;
-    top: 14px;
+    top: 68px;
     right: 16px;
     z-index: 200;
     background: rgba(0,0,0,0.6);
@@ -898,17 +1032,274 @@
     min-height: 16px;
   }
 
-  /* ===== Banner 淡入动画 ===== */
-  #recommend-banner {
-    opacity: 0;
-    transform: translateY(-8px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+  /* ===== A: 内容区切换时fade-out/in ===== */
+  .content-fade-out {
+    animation: content-fade-out 0.18s ease forwards !important;
+  }
+  .content-fade-in {
+    animation: content-fade-in 0.28s ease forwards !important;
+  }
+  @keyframes content-fade-out {
+    from { opacity: 1; transform: scale(1); }
+    to   { opacity: 0; transform: scale(0.97); }
+  }
+  @keyframes content-fade-in {
+    from { opacity: 0; transform: scale(0.97); }
+    to   { opacity: 1; transform: scale(1); }
   }
 
-  #recommend-banner.visible {
-    opacity: 1;
-    transform: translateY(0);
+  /* ===== H: 祝福语切换时fade-out ===== */
+  .blessing-fade-out {
+    animation: blessing-out 0.2s ease forwards !important;
   }
+  @keyframes blessing-out {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-6px); }
+  }
+
+  /* ===== D: 光圈祈福时加速 ===== */
+  .halo-outer.praying {
+    animation: halo-spin 1.2s linear infinite !important;
+  }
+  .halo-inner.praying {
+    opacity: 0.7 !important;
+    box-shadow: inset 0 0 50px var(--deity-glow) !important;
+  }
+
+  /* ===== E: 分享遮罩弹出动画 ===== */
+  #share-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0,0,0,0);
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+  }
+  #share-overlay.active {
+    display: flex;
+    background: rgba(0,0,0,0.85);
+    animation: overlay-bg-in 0.3s ease forwards;
+  }
+  #share-overlay.closing {
+    display: flex;
+    animation: overlay-bg-out 0.25s ease forwards;
+  }
+  @keyframes overlay-bg-in {
+    from { background: rgba(0,0,0,0); }
+    to   { background: rgba(0,0,0,0.85); }
+  }
+  @keyframes overlay-bg-out {
+    from { background: rgba(0,0,0,0.85); }
+    to   { background: rgba(0,0,0,0); }
+  }
+  .share-card {
+    background: linear-gradient(160deg, #0d0020, #050010);
+    border: 1px solid var(--deity-primary);
+    border-radius: 18px;
+    padding: 28px 24px;
+    max-width: 320px;
+    width: calc(100vw - 48px);
+    box-shadow: 0 0 40px var(--deity-glow);
+    text-align: center;
+    position: relative;
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+    transition: none;
+  }
+  #share-overlay.active .share-card {
+    animation: card-pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  #share-overlay.closing .share-card {
+    animation: card-pop-out 0.22s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+  }
+  @keyframes card-pop-in {
+    from { transform: scale(0.82) translateY(24px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  @keyframes card-pop-out {
+    from { transform: scale(1) translateY(0); opacity: 1; }
+    to   { transform: scale(0.88) translateY(16px); opacity: 0; }
+  }
+
+  /* ===== B: 按钮波纹Ripple ===== */
+  .btn-worship {
+    position: relative;
+    width: 190px;
+    height: 60px;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    background: transparent;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+  }
+  .ripple-effect {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple-expand 0.55s linear;
+    background: radial-gradient(circle, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 70%);
+    pointer-events: none;
+    z-index: 2;
+  }
+  @keyframes ripple-expand {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  /* ===== C: Banner点击反馈 ===== */
+  .rec-card {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--rec-color, rgba(255,215,0,0.35));
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rec-card:active {
+    transform: scale(0.97);
+  }
+  .rec-card.tap-flash {
+    animation: banner-tap 0.3s ease;
+  }
+  @keyframes banner-tap {
+    0%   { box-shadow: 0 0 0 0 var(--rec-glow, rgba(255,215,0,0.5)); }
+    50%  { box-shadow: 0 0 20px 6px var(--rec-glow, rgba(255,215,0,0.4)); }
+    100% { box-shadow: 0 0 0 0 var(--rec-glow, rgba(255,215,0,0)); }
+  }
+  .rec-goto-arrow {
+    font-size: 16px;
+    color: var(--rec-color, #FFD700);
+    opacity: 0.6;
+    transition: opacity 0.2s, transform 0.2s;
+    flex-shrink: 0;
+  }
+  .rec-card:hover .rec-goto-arrow,
+  .rec-card:active .rec-goto-arrow {
+    opacity: 1;
+    transform: translateX(3px);
+  }
+
+  /* ===== 赛博风确认对话框 ===== */
+  #cyber-confirm {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(0,0,0,0);
+    align-items: center;
+    justify-content: center;
+  }
+  #cyber-confirm.active {
+    display: flex;
+    animation: overlay-bg-in 0.25s ease forwards;
+  }
+  #cyber-confirm.closing {
+    display: flex;
+    animation: overlay-bg-out 0.2s ease forwards;
+  }
+  .cyber-confirm-box {
+    background: linear-gradient(160deg, #0a001a, #050010);
+    border: 1px solid rgba(0,229,255,0.5);
+    border-radius: 16px;
+    padding: 28px 24px 20px;
+    max-width: 280px;
+    width: calc(100vw - 56px);
+    box-shadow: 0 0 30px rgba(0,229,255,0.25), 0 0 60px rgba(0,229,255,0.08);
+    text-align: center;
+    position: relative;
+    transform: scale(0.85) translateY(20px);
+    opacity: 0;
+  }
+  #cyber-confirm.active .cyber-confirm-box {
+    animation: card-pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  #cyber-confirm.closing .cyber-confirm-box {
+    animation: card-pop-out 0.2s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+  }
+  .cyber-confirm-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 10px rgba(0,229,255,0.5));
+  }
+  .cyber-confirm-title {
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: rgba(0,229,255,0.9);
+    text-shadow: 0 0 10px rgba(0,229,255,0.5);
+    margin-bottom: 8px;
+  }
+  .cyber-confirm-msg {
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 1px;
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+  .cyber-confirm-btns {
+    display: flex;
+    gap: 10px;
+  }
+  .cyber-confirm-btns button {
+    flex: 1;
+    height: 40px;
+    border: none;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    font-family: 'Noto Serif SC', serif;
+    cursor: pointer;
+    transition: transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cyber-confirm-btns button:active { transform: scale(0.94); }
+  .cyber-confirm-ok {
+    background: linear-gradient(135deg, #003366, #0066CC, #00BFFF);
+    color: #00E5FF;
+    box-shadow: 0 0 12px rgba(0,229,255,0.3);
+  }
+  .cyber-confirm-cancel {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.4);
+    border: 1px solid rgba(255,255,255,0.12) !important;
+  }
+
+  /* ===== 祈福按钮冷却状态 ===== */
+  #worship-cooldown-ring {
+    position: absolute;
+    inset: -4px;
+    border-radius: 34px;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.2s;
+    overflow: visible;
+  }
+  #worship-cooldown-ring.active { opacity: 1; }
+  #worship-cooldown-ring svg {
+    width: 100%;
+    height: 100%;
+  }
+  .btn-cooldown-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 30px;
+    background: rgba(0,0,0,0.45);
+    z-index: 3;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .btn-cooldown-overlay.active { opacity: 1; }
 </style>
 </head>
 <body>
@@ -954,22 +1345,14 @@
 <div id="flash-overlay"></div>
 
 <!-- PWA 安装提示条 -->
-<div id="install-bar" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;
-  background:linear-gradient(135deg,#1a0a00,#0a0a1a);
-  border-top:1px solid rgba(255,215,0,0.4);
-  padding:12px 16px;align-items:center;gap:12px;
-  box-shadow:0 -4px 20px rgba(255,215,0,0.15);">
-  <span style="font-size:22px">⛩️</span>
-  <div style="flex:1;font-family:sans-serif;">
-    <div style="color:#FFD700;font-size:13px;font-weight:700;letter-spacing:1px">添加到主屏幕</div>
-    <div style="color:rgba(255,255,255,0.5);font-size:11px;margin-top:2px">像App一样使用赛博神殿</div>
+<div id="install-bar">
+  <span id="install-bar-icon">⛩️</span>
+  <div id="install-bar-text">
+    <div id="install-bar-text-main">添加到主屏幕</div>
+    <div id="install-bar-text-sub">像App一样使用赛博神殿</div>
   </div>
-  <button id="install-btn" style="background:linear-gradient(135deg,#8B0000,#FF2D55);
-    color:#FFD700;border:1px solid #FFD700;border-radius:8px;
-    padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;
-    letter-spacing:1px;white-space:nowrap">立即安装</button>
-  <button id="install-close" style="background:none;border:none;color:rgba(255,255,255,0.3);
-    font-size:18px;cursor:pointer;padding:4px;line-height:1">×</button>
+  <button id="install-btn">立即安装</button>
+  <button id="install-close">×</button>
 </div>
 
 <!-- 今日五行旺色标签 -->
@@ -983,15 +1366,48 @@
 <!-- 今日推荐 Banner -->
 <div id="recommend-banner">
   <div class="rec-user-name" id="recUserName"></div>
-  <div class="rec-card" id="recCard">
+  <div class="rec-card" id="recCard" onclick="bannerTap()">
     <div class="rec-icon-wrap" id="recIcon"></div>
     <div class="rec-content">
       <div class="rec-tag">◆ 今日命盘推荐</div>
       <div class="rec-name" id="recName"></div>
       <div class="rec-reason" id="recReason"></div>
-      <div class="rec-reason" id="recDetail" style="opacity:0.4;font-size:10px;margin-top:1px;"></div>
+      <div class="rec-reason" id="recDetail" style="opacity:0.65;font-size:11px;margin-top:3px;"></div>
     </div>
+    <div class="rec-goto-arrow">↗</div>
+  </div>
+</div>
 
+<!-- 分享按钮 -->
+<button id="share-btn" onclick="openShare()">✦ 分享祈福</button>
+
+<!-- 分享遮罩 -->
+<div id="share-overlay">
+  <div class="share-card" id="shareCard">
+    <div class="share-card-logo" id="shareIcon"></div>
+    <div class="share-card-site">赛博神殿 · CYBER TEMPLE</div>
+    <div class="share-card-deity" id="shareDeityName"></div>
+    <div class="share-card-reason" id="shareReason"></div>
+    <div class="share-card-detail" id="shareDetail"></div>
+    <div class="share-card-blessing" id="shareBlessing">按下祈福键，获取今日神明批示</div>
+    <div class="share-card-footer">✦ 信息仅存于本机，不会上传 ✦</div>
+    <div class="share-card-btns">
+      <button class="share-copy-btn" onclick="copyShareText()">复制文字</button>
+      <button class="share-close-btn" onclick="closeShare()">关 闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 赛博风确认对话框 -->
+<div id="cyber-confirm">
+  <div class="cyber-confirm-box">
+    <div class="cyber-confirm-icon">⚠️</div>
+    <div class="cyber-confirm-title" id="cyberConfirmTitle">确 认 操 作</div>
+    <div class="cyber-confirm-msg" id="cyberConfirmMsg"></div>
+    <div class="cyber-confirm-btns">
+      <button class="cyber-confirm-ok" id="cyberConfirmOk">确 认</button>
+      <button class="cyber-confirm-cancel" id="cyberConfirmCancel">取 消</button>
+    </div>
   </div>
 </div>
 
@@ -1039,7 +1455,20 @@
   <button class="btn-worship" id="worshipBtn" onclick="worship()">
     <div class="btn-border" id="btnBorder"></div>
     <div class="btn-bg" id="btnBg"></div>
+    <div class="btn-cooldown-overlay" id="btnCooldownOverlay"></div>
     <span class="btn-main-text" id="btnText"></span>
+    <div id="worship-cooldown-ring">
+      <svg viewBox="0 0 198 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="194" height="64" rx="32" ry="32"
+          stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+        <rect id="cooldownArc" x="2" y="2" width="194" height="64" rx="32" ry="32"
+          stroke="var(--deity-primary)" stroke-width="2"
+          fill="none"
+          stroke-dasharray="512"
+          stroke-dashoffset="512"
+          style="transition:stroke-dashoffset linear;filter:drop-shadow(0 0 4px var(--deity-glow))"/>
+      </svg>
+    </div>
   </button>
 
   <div class="footer-deco" id="footerDeco"></div>
@@ -1746,6 +2175,7 @@ const DEITIES = [
 // =====================================================
 let currentDeityIndex = 0;
 let isCooldown = false;
+let isSwitching = false; // 神明切换防竞态锁
 
 // 每个神明独立计数
 function getCount(id) { return parseInt(localStorage.getItem('cyber_count_' + id) || '0'); }
@@ -1816,12 +2246,13 @@ function playSound(deity) {
   const ctx = getACtx();
   const now = ctx.currentTime;
   const primaryFreqs = {
-    caishen: [523, 659, 784, 1047],
-    yuelao: [392, 494, 587, 784],
+    caishen:  [523, 659, 784, 1047],
+    yuelao:   [392, 494, 587, 784],
     wenchang: [440, 554, 659, 880],
-    yaowang: [349, 440, 523, 698],
-    taibai: [466, 587, 698, 932],
-    ouhuang: [523, 698, 880, 1047],
+    yaowang:  [349, 440, 523, 698],
+    taibai:   [466, 587, 698, 932],
+    ouhuang:  [523, 698, 880, 1047],
+    tiangong: [396, 528, 660, 792],
   };
 
   // 低频冲击
@@ -1932,7 +2363,7 @@ function initDots() {
     const dot = document.createElement('div');
     dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
     dot.addEventListener('click', () => {
-      if (isCooldown || i === currentDeityIndex) return;
+      if (isCooldown || isSwitching || i === currentDeityIndex) return;
       switchDeity(i, i > currentDeityIndex ? 'left' : 'right');
     });
     dots.appendChild(dot);
@@ -1949,6 +2380,8 @@ function updateDots(index) {
 // 切换神明
 // =====================================================
 function switchDeity(index, direction = 'left', animate = true) {
+  if (isSwitching) return;
+  isSwitching = true;
   currentDeityIndex = index;
   const d = DEITIES[index];
 
@@ -1964,41 +2397,75 @@ function switchDeity(index, direction = 'left', animate = true) {
     container.classList.remove('slide-left', 'slide-right');
     void container.offsetWidth;
     container.classList.add(direction === 'left' ? 'slide-left' : 'slide-right');
-    setTimeout(() => container.classList.remove('slide-left', 'slide-right'), 350);
+    setTimeout(() => {
+      container.classList.remove('slide-left', 'slide-right');
+      isSwitching = false;
+    }, 350);
+  } else {
+    isSwitching = false;
   }
 
-  // 更新文字内容
-  document.getElementById('subtitleEl').textContent = d.subtitle;
-  document.getElementById('titleEl').textContent = d.title;
-  document.getElementById('titleEnEl').textContent = d.titleEn;
-  document.getElementById('statusText').textContent = d.statusOnline;
-  document.getElementById('blessingBox').setAttribute('data-label', d.blessingLabel);
-  document.getElementById('idleText').textContent = d.idleText;
-  document.getElementById('btnText').textContent = d.btnText;
-  document.getElementById('footerDeco').textContent = d.footer;
-
-  // 重置祝福语
+  // H: 祝福语先fade-out，再更新内容
   const blessEl = document.getElementById('blessingText');
   const idleEl = document.getElementById('idleText');
-  blessEl.classList.remove('show');
-  blessEl.style.display = 'none';
-  idleEl.style.display = 'block';
+  if (blessEl.classList.contains('show')) {
+    blessEl.classList.add('blessing-fade-out');
+    setTimeout(() => {
+      blessEl.classList.remove('show', 'blessing-fade-out');
+      blessEl.style.display = 'none';
+      idleEl.style.display = 'block';
+    }, 200);
+  } else {
+    blessEl.classList.remove('show');
+    blessEl.style.display = 'none';
+    idleEl.style.display = 'block';
+  }
 
-  // 更新计数
-  document.getElementById('countNum').textContent = getCount(d.id);
+  // A: 内容区先淡出再淡入更新
+  const titleArea = document.querySelector('.title-area');
+  const statusBar = document.querySelector('.status-bar');
+  const blessingBox = document.getElementById('blessingBox');
 
-  // 更新神像
-  document.getElementById('deityWrap').innerHTML = d.svgContent;
+  [titleArea, statusBar, blessingBox].forEach(el => {
+    if (!el) return;
+    el.classList.remove('content-fade-in');
+    el.classList.add('content-fade-out');
+  });
+
+  setTimeout(() => {
+    // 更新文字内容
+    document.getElementById('subtitleEl').textContent = d.subtitle;
+    document.getElementById('titleEl').textContent = d.title;
+    document.getElementById('titleEnEl').textContent = d.titleEn;
+    document.getElementById('statusText').textContent = d.statusOnline;
+    document.getElementById('blessingBox').setAttribute('data-label', d.blessingLabel);
+    document.getElementById('idleText').textContent = d.idleText;
+    document.getElementById('btnText').textContent = d.btnText;
+    document.getElementById('footerDeco').textContent = d.footer;
+
+    // 更新计数
+    document.getElementById('countNum').textContent = getCount(d.id);
+
+    // 更新神像
+    document.getElementById('deityWrap').innerHTML = d.svgContent;
+
+    [titleArea, statusBar, blessingBox].forEach(el => {
+      if (!el) return;
+      el.classList.remove('content-fade-out');
+      el.classList.add('content-fade-in');
+      setTimeout(() => el.classList.remove('content-fade-in'), 300);
+    });
+  }, 180);
 }
 
 function prevDeity() {
-  if (isCooldown) return;
+  if (isCooldown || isSwitching) return;
   const next = (currentDeityIndex - 1 + DEITIES.length) % DEITIES.length;
   switchDeity(next, 'right');
 }
 
 function nextDeity() {
-  if (isCooldown) return;
+  if (isCooldown || isSwitching) return;
   const next = (currentDeityIndex + 1) % DEITIES.length;
   switchDeity(next, 'left');
 }
@@ -2034,7 +2501,33 @@ function worship() {
 
   // 计数
   const n = addCount(d.id);
+  const countDisplay = document.getElementById('countDisplay');
   document.getElementById('countNum').textContent = n;
+  countDisplay.classList.remove('count-bounce');
+  void countDisplay.offsetWidth;
+  countDisplay.classList.add('count-bounce');
+  setTimeout(() => countDisplay.classList.remove('count-bounce'), 500);
+
+  // B: 按钮波纹Ripple效果
+  const btn = document.getElementById('worshipBtn');
+  const btnRect = btn.getBoundingClientRect();
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple-effect';
+  const size = Math.max(btnRect.width, btnRect.height) * 2;
+  ripple.style.width = ripple.style.height = size + 'px';
+  ripple.style.left = (btnRect.width / 2 - size / 2) + 'px';
+  ripple.style.top = (btnRect.height / 2 - size / 2) + 'px';
+  btn.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 600);
+
+  // B: 按下时btn-bg光晕收缩
+  const btnBg = document.getElementById('btnBg');
+  btnBg.style.transform = 'scale(0.93)';
+  btnBg.style.boxShadow = '0 0 6px var(--deity-glow), inset 0 2px 8px rgba(0,0,0,0.4)';
+  setTimeout(() => {
+    btnBg.style.transform = '';
+    btnBg.style.boxShadow = '';
+  }, 200);
 
   // 音效
   playSound(d.id);
@@ -2050,11 +2543,19 @@ function worship() {
   wrap.classList.add('blessed');
   setTimeout(() => wrap.classList.remove('blessed'), 800);
 
+  // D: 光圈加速
+  const haloOuter = document.getElementById('haloOuter');
+  const haloInner = document.getElementById('haloInner');
+  haloOuter.classList.add('praying');
+  haloInner.classList.add('praying');
+  setTimeout(() => {
+    haloOuter.classList.remove('praying');
+    haloInner.classList.remove('praying');
+  }, 1200);
+
   // 特效
-  const btn = document.getElementById('worshipBtn');
-  const rect = btn.getBoundingClientRect();
-  const bx = rect.left + rect.width / 2;
-  const by = rect.top;
+  const bx = btnRect.left + btnRect.width / 2;
+  const by = btnRect.top;
   spawnFloaters(bx, by, d.floaters);
   spawnMatrix(d.matrixChars, d.colors.primary);
   spawnBurst(bx, by, d.colors.primary);
@@ -2074,10 +2575,30 @@ function worship() {
     blessEl.textContent = blessing;
     blessEl.classList.add('show');
     document.getElementById('statusText').textContent = d.statusDone;
+    // 同步更新分享卡祝福语
+    const shareBlessingEl = document.getElementById('shareBlessing');
+    if (shareBlessingEl) shareBlessingEl.textContent = blessing;
   }, 500);
 
   // 冷却
-  setTimeout(() => { isCooldown = false; }, 2000);
+  const cooldownOverlay = document.getElementById('btnCooldownOverlay');
+  const cooldownRing = document.getElementById('worship-cooldown-ring');
+  const cooldownArc = document.getElementById('cooldownArc');
+  const COOLDOWN_MS = 1200;
+  const PERIMETER = 512;
+
+  cooldownOverlay.classList.add('active');
+  cooldownRing.classList.add('active');
+  cooldownArc.style.transition = `stroke-dashoffset ${COOLDOWN_MS}ms linear`;
+  cooldownArc.style.strokeDashoffset = '0';
+
+  setTimeout(() => {
+    isCooldown = false;
+    cooldownOverlay.classList.remove('active');
+    cooldownRing.classList.remove('active');
+    cooldownArc.style.transition = 'none';
+    cooldownArc.style.strokeDashoffset = String(PERIMETER);
+  }, COOLDOWN_MS);
 }
 
 // 键盘支持
@@ -2086,6 +2607,36 @@ document.addEventListener('keydown', e => {
   if (e.code === 'ArrowLeft') prevDeity();
   if (e.code === 'ArrowRight') nextDeity();
 });
+
+// =====================================================
+// 长按祈福：按住不放每 800ms 连续触发一次
+// =====================================================
+let longPressTimer = null;
+let longPressInterval = null;
+
+const worshipBtnEl = document.getElementById('worshipBtn');
+
+function startLongPress() {
+  longPressTimer = setTimeout(() => {
+    longPressInterval = setInterval(() => {
+      worship();
+    }, 800);
+  }, 600); // 600ms 后进入连击模式
+}
+
+function stopLongPress() {
+  clearTimeout(longPressTimer);
+  clearInterval(longPressInterval);
+  longPressTimer = null;
+  longPressInterval = null;
+}
+
+worshipBtnEl.addEventListener('mousedown', startLongPress);
+worshipBtnEl.addEventListener('touchstart', startLongPress, { passive: true });
+worshipBtnEl.addEventListener('mouseup', stopLongPress);
+worshipBtnEl.addEventListener('mouseleave', stopLongPress);
+worshipBtnEl.addEventListener('touchend', stopLongPress);
+worshipBtnEl.addEventListener('touchcancel', stopLongPress);
 
 // =====================================================
 // 命盘系统 · 五行推荐算法
@@ -2309,11 +2860,15 @@ function showRecommendBanner(user, rec) {
   document.getElementById('recName').textContent = d.name;
   document.getElementById('recReason').textContent = rec.reason;
   document.getElementById('recDetail').textContent = rec.detail;
-  banner.style.display = 'block';
   // 淡入动画
   requestAnimationFrame(() => {
     requestAnimationFrame(() => banner.classList.add('visible'));
   });
+
+  // 更新分享卡内容
+  updateShareCard(d, rec);
+  // 显示分享按钮
+  document.getElementById('share-btn').style.display = 'block';
 }
 
 function jumpToRecommended() {
@@ -2350,50 +2905,74 @@ function submitOnboarding() {
   const bar = document.getElementById('parsingBar');
   const stepEl = document.getElementById('parsingStep');
   const steps = [
-    '正在读取生辰信息...',
-    '计算天干地支...',
-    '分析五行命盘...',
-    '匹配今日神明...',
-    '解析完成 ✓'
+    `正在读取 ${name} 的生辰信息...`,
+    `计算 ${name} 的天干地支...`,
+    `分析五行命盘格局...`,
+    `为 ${name} 匹配今日神明...`,
+    `解析完成 ✓`
   ];
 
+  // F: 赛博感进度条：先快速冲到75%，然后减速到92%，最后一次性完成
   let progress = 0;
   let stepIdx = 0;
   stepEl.textContent = steps[0];
 
+  // 阶段1：快速冲到72%（前1.2s）
+  // 阶段2：减速爬到92%（1.2s~2.2s）
+  // 阶段3：短暂停顿后瞬间100%
+  const phase1Target = 72;
+  const phase2Target = 92;
+
+  function getIncrement(p) {
+    if (p < phase1Target) return 2.8;        // 快速
+    if (p < phase2Target) return 0.55;       // 减速
+    return 0;                                 // 等待爆发
+  }
+
   const interval = setInterval(() => {
-    progress += 2;
+    const inc = getIncrement(progress);
+    if (inc > 0) {
+      progress = Math.min(progress + inc, phase2Target);
+    }
     bar.style.width = progress + '%';
-    const newStepIdx = Math.min(Math.floor(progress / 22), steps.length - 1);
+    const newStepIdx = Math.min(Math.floor(progress / 22), steps.length - 2);
     if (newStepIdx !== stepIdx) {
       stepIdx = newStepIdx;
       stepEl.textContent = steps[stepIdx];
     }
-    if (progress >= 100) {
+    if (progress >= phase2Target) {
+      // 在92%卡顿一下，模拟"最后计算"
       clearInterval(interval);
       setTimeout(() => {
-        overlay.style.display = 'none';
+        // 爆发冲到100%
+        bar.style.transition = 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
+        bar.style.width = '100%';
+        stepEl.textContent = steps[steps.length - 1];
+        setTimeout(() => {
+          bar.style.transition = '';
+          overlay.style.display = 'none';
 
-        saveUser(name, birthStr);
-        const birthDate = new Date(birthStr + 'T00:00:00');
-        const rec = recommendDeity(name, birthDate);
-        saveRec(rec);
+          saveUser(name, birthStr);
+          const birthDate = new Date(birthStr + 'T00:00:00');
+          const rec = recommendDeity(name, birthDate);
+          saveRec(rec);
 
-        // 先切换到推荐神明（无动画，直接到位）
-        const targetIdx = DEITIES.findIndex(d => d.id === rec.deityId);
-        if (targetIdx >= 0) switchDeity(targetIdx, 'left', false);
+          // 先切换到推荐神明（无动画，直接到位）
+          const targetIdx = DEITIES.findIndex(d => d.id === rec.deityId);
+          if (targetIdx >= 0) switchDeity(targetIdx, 'left', false);
 
-        // 隐藏录入页
-        const screen = document.getElementById('onboarding-screen');
-        screen.classList.add('hidden');
-        setTimeout(() => { screen.style.display = 'none'; }, 650);
+          // 隐藏录入页
+          const screen = document.getElementById('onboarding-screen');
+          screen.classList.add('hidden');
+          setTimeout(() => { screen.style.display = 'none'; }, 650);
 
-        showRecommendBanner({ name }, rec);
-        showTodayWuxingBar();
-        document.getElementById('edit-profile-btn').style.display = 'block';
-      }, 300);
+          showRecommendBanner({ name }, rec);
+          showTodayWuxingBar();
+          document.getElementById('edit-profile-btn').style.display = 'block';
+        }, 300);
+      }, 380);
     }
-  }, 50); // 50ms * 50次 = 2.5s
+  }, 42); // ~42ms间隔，阶段1：72/(2.8/42*1000) ≈1.08s，阶段2更慢
 }
 
 function initUserSystem() {
@@ -2434,38 +3013,164 @@ function showTodayWuxingBar() {
   const bar = document.getElementById('today-wuxing-bar');
   const dot = document.getElementById('todayWxDot');
   const text = document.getElementById('todayWxText');
+  const tag = document.getElementById('todayWuxingTag');
 
   const todayName = WX_NAME[todayBoost];
   const todayEmoji = WX_EMOJI_MAP[todayBoost];
-  dot.style.backgroundColor = WX_COLOR[todayBoost];
-  dot.style.color = WX_COLOR[todayBoost];
+  const color = WX_COLOR[todayBoost];
+  dot.style.backgroundColor = color;
+  dot.style.color = color;
   text.textContent = `今日 ${todayEmoji} ${todayName}旺`;
+  // 与推荐Banner联动：边框和文字用五行对应色
+  tag.style.borderColor = color + '55';
+  tag.style.color = color;
 
   bar.style.display = 'block';
 }
 
+// =====================================================
+// 分享功能
+// =====================================================
+function updateShareCard(d, rec) {
+  document.getElementById('shareIcon').textContent = d.icon;
+  document.getElementById('shareDeityName').textContent = d.name;
+  document.getElementById('shareReason').textContent = rec.reason;
+  document.getElementById('shareDetail').textContent = rec.detail;
+  // 更新分享卡颜色变量
+  const shareCard = document.getElementById('shareCard');
+  shareCard.style.setProperty('--deity-primary', d.colors.primary);
+  shareCard.style.setProperty('--deity-secondary', d.colors.secondary);
+  shareCard.style.setProperty('--deity-glow', d.colors.glow);
+  shareCard.style.setProperty('--deity-border', d.colors.border);
+  shareCard.style.setProperty('--deity-btn-bg', d.colors.btnBg);
+}
+
+function openShare() {
+  const overlay = document.getElementById('share-overlay');
+  overlay.classList.remove('closing');
+  overlay.classList.add('active');
+  // 如果已有祝福语则同步
+  const currentBlessing = document.getElementById('blessingText');
+  if (currentBlessing.classList.contains('show') && currentBlessing.textContent) {
+    document.getElementById('shareBlessing').textContent = currentBlessing.textContent;
+  }
+}
+
+function closeShare() {
+  const overlay = document.getElementById('share-overlay');
+  overlay.classList.add('closing');
+  setTimeout(() => {
+    overlay.classList.remove('active', 'closing');
+  }, 250);
+}
+
+// C: Banner点击涟漪 + 跳转推荐神明
+function bannerTap() {
+  const card = document.getElementById('recCard');
+  card.classList.remove('tap-flash');
+  void card.offsetWidth;
+  card.classList.add('tap-flash');
+  setTimeout(() => card.classList.remove('tap-flash'), 350);
+  jumpToRecommended();
+}
+
+function copyShareText() {
+  const d = DEITIES[currentDeityIndex];
+  const reason = document.getElementById('shareReason').textContent;
+  const detail = document.getElementById('shareDetail').textContent;
+  const blessing = document.getElementById('shareBlessing').textContent;
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
+
+  const text = `【赛博神殿 · 今日祈福】${dateStr}\n\n` +
+    `✦ 今日推荐：${d.name}\n` +
+    `${reason}\n${detail}\n\n` +
+    `神明批示：${blessing}\n\n` +
+    `⛩️ 赛博神殿 · CYBER TEMPLE`;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.share-copy-btn');
+      const orig = btn.textContent;
+      btn.textContent = '已复制 ✓';
+      setTimeout(() => { btn.textContent = orig; }, 1800);
+    }).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  const btn = document.querySelector('.share-copy-btn');
+  const orig = btn.textContent;
+  btn.textContent = '已复制 ✓';
+  setTimeout(() => { btn.textContent = orig; }, 1800);
+}
+
+// 点击遮罩背景关闭分享
+document.getElementById('share-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeShare();
+});
+
+// =====================================================
+// 赛博风确认对话框
+// =====================================================
+function cyberConfirm(msg, onOk) {
+  const dialog = document.getElementById('cyber-confirm');
+  document.getElementById('cyberConfirmMsg').textContent = msg;
+  dialog.classList.remove('closing');
+  dialog.classList.add('active');
+
+  const okBtn = document.getElementById('cyberConfirmOk');
+  const cancelBtn = document.getElementById('cyberConfirmCancel');
+
+  function close(confirmed) {
+    dialog.classList.add('closing');
+    setTimeout(() => dialog.classList.remove('active', 'closing'), 200);
+    okBtn.removeEventListener('click', handleOk);
+    cancelBtn.removeEventListener('click', handleCancel);
+    dialog.removeEventListener('click', onBg);
+    if (confirmed) onOk();
+  }
+  function handleOk() { close(true); }
+  function handleCancel() { close(false); }
+  function onBg(e) { if (e.target === dialog) close(false); }
+
+  okBtn.addEventListener('click', handleOk);
+  cancelBtn.addEventListener('click', handleCancel);
+  dialog.addEventListener('click', onBg);
+}
+
 function resetProfile() {
-  if (!confirm('确定要重新填写命盘信息吗？')) return;
-  localStorage.removeItem('cyber_user_profile');
-  localStorage.removeItem('cyber_today_rec');
+  cyberConfirm('确定要重新填写命盘信息吗？\n此操作将清空今日推荐记录。', () => {
+    localStorage.removeItem('cyber_user_profile');
+    localStorage.removeItem('cyber_today_rec');
 
-  // 隐藏五行条和修改按钮
-  document.getElementById('today-wuxing-bar').style.display = 'none';
-  document.getElementById('edit-profile-btn').style.display = 'none';
+    // 隐藏五行条和修改按钮
+    document.getElementById('today-wuxing-bar').style.display = 'none';
+    document.getElementById('edit-profile-btn').style.display = 'none';
 
-  // 隐藏 banner
-  const banner = document.getElementById('recommend-banner');
-  banner.classList.remove('visible');
-  setTimeout(() => { banner.style.display = 'none'; }, 600);
+    // 隐藏 banner
+    const banner = document.getElementById('recommend-banner');
+    banner.classList.remove('visible');
+    document.getElementById('share-btn').style.display = 'none';
 
-  // 重置输入框
-  document.getElementById('ob-name').value = '';
-  document.getElementById('ob-birth').value = '';
+    // 重置输入框
+    document.getElementById('ob-name').value = '';
+    document.getElementById('ob-birth').value = '';
 
-  // 显示录入页
-  const screen = document.getElementById('onboarding-screen');
-  screen.style.display = 'flex';
-  screen.classList.remove('hidden');
+    // 显示录入页
+    const screen = document.getElementById('onboarding-screen');
+    screen.style.display = 'flex';
+    screen.classList.remove('hidden');
+  });
 }
 
 // =====================================================
