@@ -19,6 +19,8 @@
 <meta name="apple-mobile-web-app-title" content="赛博神殿">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="description" content="赛博朋克风格祈福应用，财神·月老·天公，一键祈福">
+<!-- html2canvas: 分享图片生成 -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
   :root {
     --c1: #FFD700;
@@ -47,13 +49,10 @@
     flex: 1;
     width: 100%;
     height: 0; /* 配合 flex:1 精确填满剩余高度（手机端） */
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;  /* 禁止滚动，一屏显示 */
     display: flex;
     flex-direction: column;
     align-items: center;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
     position: relative;
   }
   #app-scroll::-webkit-scrollbar { display: none; }
@@ -181,15 +180,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(8px, 1.6vh, 18px);
-    padding: clamp(6px, 1vh, 12px) 16px clamp(16px, 2vh, 28px);
+    gap: clamp(5px, 1vh, 12px);
+    padding: clamp(2px, 0.5vh, 8px) 16px clamp(10px, 1.5vh, 20px);
     max-width: 420px;
     width: 100%;
     flex: 1;
+    min-height: 0;       /* 允许 flex 子项收缩 */
+    overflow: hidden;    /* 禁止撑出滚动 */
   }
 
   /* ===== 标题区 ===== */
-  .title-area { text-align: center; flex-shrink: 0; }
+  .title-area { text-align: center; flex-shrink: 1; }
 
   .subtitle {
     font-size: clamp(9px, 1.2vh, 10px);
@@ -225,10 +226,10 @@
   /* ===== 神像区 ===== */
   .deity-frame {
     position: relative;
-    width: clamp(150px, 26vh, 200px);
-    height: clamp(150px, 26vh, 200px);
+    width: clamp(120px, 22vh, 200px);
+    height: clamp(120px, 22vh, 200px);
     perspective: 600px;
-    flex-shrink: 0;
+    flex-shrink: 1;
   }
 
   #deityTiltWrap {
@@ -264,8 +265,8 @@
     inset: 6px;
     border-radius: 50%;
     border: 1px solid var(--deity-primary);
-    opacity: 0.3;
-    box-shadow: inset 0 0 30px var(--deity-glow);
+    opacity: 0.45;
+    box-shadow: inset 0 0 40px var(--deity-glow), 0 0 15px var(--deity-glow);
     transition: all 0.6s;
   }
 
@@ -275,7 +276,7 @@
     position: absolute;
     inset: 14px;
     border-radius: 50%;
-    background: radial-gradient(circle at 40% 35%, #1a0a2e, #050010);
+    background: radial-gradient(circle at 50% 45%, #1a0a2e, #050010);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -285,9 +286,14 @@
 
   .deity-svg-wrap {
     position: relative;
-    width: 120px;
-    height: 120px;
+    width: 74%;
+    height: 74%;
+    max-width: 148px;
+    max-height: 148px;
     transition: filter 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .deity-svg-wrap.blessed {
@@ -313,13 +319,18 @@
     justify-content: center;
   }
 
+  /* SVG 图标本身居中不变形 */
+  .deity-img svg,
+  #deityWrap svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
   .deity-img.visible { opacity: 1; }
 
   .count-display {
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
     background: rgba(0,0,0,0.85);
     border: 1px solid var(--deity-primary);
     border-radius: 20px;
@@ -329,7 +340,10 @@
     white-space: nowrap;
     text-shadow: 0 0 6px var(--deity-primary);
     box-shadow: 0 0 10px var(--deity-glow);
-    transition: all 0.5s;
+    transition: box-shadow 0.5s, border-color 0.5s, color 0.5s;
+    flex-shrink: 0;
+    transform-origin: center center;
+    will-change: transform;
   }
 
   /* ===== 状态栏 ===== */
@@ -342,7 +356,7 @@
     opacity: 0.7;
     letter-spacing: 2px;
     transition: all 0.5s;
-    flex-shrink: 0;
+    flex-shrink: 1;
   }
 
   .status-dot {
@@ -362,38 +376,53 @@
   /* ===== 祝福语区 ===== */
   .blessing-box {
     width: 100%;
-    min-height: clamp(64px, 10vh, 84px);
-    background: rgba(255,255,255,0.02);
+    min-height: clamp(52px, 8vh, 84px);
+    background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
     border: 1px solid var(--deity-border);
-    border-radius: 12px;
-    padding: clamp(10px, 1.6vh, 16px) 18px;
+    border-radius: 14px;
+    padding: clamp(8px, 1.4vh, 16px) 20px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: border-color 0.5s;
-    flex-shrink: 0;
+    transition: border-color 0.5s, box-shadow 0.5s;
+    flex-shrink: 1;
+    box-shadow: 0 0 20px var(--deity-shadow), inset 0 1px 0 rgba(255,255,255,0.06);
   }
 
   .blessing-box::before {
     content: attr(data-label);
     position: absolute;
-    top: -10px;
+    top: -9px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--bg);
-    padding: 0 10px;
+    /* 用渐变代替纯色背景，避免与手机壳背景色不匹配 */
+    background: linear-gradient(90deg, transparent 0%, var(--bg) 15%, var(--bg) 85%, transparent 100%);
+    padding: 0 14px;
     font-size: 10px;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     color: var(--deity-secondary);
-    text-shadow: 0 0 6px var(--deity-secondary);
+    text-shadow: 0 0 8px var(--deity-secondary);
     white-space: nowrap;
     transition: all 0.5s;
+    font-weight: 700;
+  }
+
+  /* 两侧装饰线 */
+  .blessing-box::after {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--deity-border), var(--deity-secondary), var(--deity-border), transparent);
+    opacity: 0.8;
   }
 
   .blessing-idle {
     font-size: 12px;
-    color: rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.22);
     letter-spacing: 3px;
     text-align: center;
   }
@@ -442,11 +471,11 @@
   .btn-main-text {
     position: relative;
     z-index: 1;
-    font-size: clamp(17px, 2.5vh, 20px);
+    font-size: clamp(18px, 2.6vh, 22px);
     font-weight: 900;
     color: var(--deity-primary);
-    text-shadow: 0 0 10px var(--deity-glow), 0 2px 4px rgba(0,0,0,0.5);
-    letter-spacing: 4px;
+    text-shadow: 0 0 14px var(--deity-glow), 0 2px 6px rgba(0,0,0,0.6);
+    letter-spacing: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -535,10 +564,10 @@
 
   /* 超矮屏（高度 < 680px，如 iPhone SE / 折叠屏外屏）额外压缩 */
   @media (max-height: 680px) and (max-width: 480px) {
-    .container { gap: clamp(6px, 1.2vh, 10px); }
-    .blessing-box { min-height: 56px; padding: 8px 16px; }
-    .deity-frame { width: clamp(130px, 22vh, 160px); height: clamp(130px, 22vh, 160px); }
-    .title { font-size: clamp(22px, 4vh, 28px); }
+    .container { gap: 4px; }
+    .blessing-box { min-height: clamp(44px, 7vh, 56px); padding: 6px 14px; }
+    .deity-frame { width: clamp(100px, 18vh, 140px); height: clamp(100px, 18vh, 140px); }
+    .title { font-size: clamp(20px, 3.8vh, 26px); }
     #deity-affinity-bar { margin-top: -4px; }
     .status-bar { display: none; }
   }
@@ -558,9 +587,7 @@
       width: 390px;
       height: min(820px, 90vh);
       flex: none;
-      /* 重置手机端的 height:0 */
-      overflow-y: auto;
-      overflow-x: hidden;
+      overflow: hidden;  /* 禁止滚动，一屏显示 */
       border-radius: 40px;
       border: 2px solid rgba(255,255,255,0.1);
       box-shadow:
@@ -741,12 +768,16 @@
     font-family: 'Noto Serif SC', serif;
     letter-spacing: 1px;
     outline: none;
-    -webkit-appearance: none;
-    appearance: none;
     text-align: center;
     transition: border-color 0.3s, box-shadow 0.3s;
     cursor: pointer;
   }
+
+  .ob-select.error {
+    border-color: rgba(255,45,85,0.8);
+  }
+
+
 
   .ob-select:focus {
     border-color: rgba(0,229,255,0.8);
@@ -783,11 +814,12 @@
     font-family: 'Noto Serif SC', serif;
     cursor: pointer;
     position: relative;
-    overflow: hidden;
+    isolation: isolate;
     box-shadow: 0 0 24px rgba(0,229,255,0.3), 0 0 48px rgba(0,229,255,0.1);
     transition: transform 0.15s, box-shadow 0.3s;
     outline: none;
     -webkit-tap-highlight-color: transparent;
+    z-index: 1;
   }
 
   .ob-btn::before {
@@ -798,6 +830,7 @@
     background: linear-gradient(135deg, #E8D5A3, #00E5FF, #FFD700, #E8D5A3);
     z-index: -1;
     animation: border-pulse 2s ease-in-out infinite;
+    pointer-events: none;
   }
 
   .ob-btn:active { transform: scale(0.96); }
@@ -822,7 +855,7 @@
     z-index: 10;
     margin: 0 16px;
     padding: 0 16px;
-    flex-shrink: 0;
+    flex-shrink: 1;
   }
 
   #recommend-banner.visible {
@@ -841,15 +874,15 @@
   }
 
   .rec-icon-wrap {
-    width: 46px;
-    height: 46px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--rec-color, rgba(255,215,0,0.4));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 20px;
     flex-shrink: 0;
     box-shadow: 0 0 12px var(--rec-glow, rgba(255,215,0,0.3));
     animation: rec-pulse 3s ease-in-out infinite;
@@ -882,17 +915,29 @@
     font-size: 11px;
     color: rgba(255,255,255,0.55);
     margin-top: 3px;
-    line-height: 1.5;
+    line-height: 1.4;
     letter-spacing: 0.3px;
+    /* 限制一行，超出省略 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  /* ===== 分享按钮 ===== */
-  #share-btn {
-    display: none;
-    position: fixed;
-    bottom: 88px;
-    right: 16px;
-    z-index: 200;
+  /* 第二行详情隐藏，节省高度 */
+  #recDetail { display: none; }
+
+  /* ===== 底部工具栏（含分享+档案按钮） ===== */
+  #bottom-toolbar {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 6px 16px 8px;
+    flex-shrink: 0;
+  }
+
+  .toolbar-btn {
     background: rgba(0,0,0,0.55);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -900,16 +945,24 @@
     border-radius: 24px;
     color: var(--deity-primary);
     font-size: 12px;
-    padding: 10px 18px;
+    padding: 8px 16px;
     cursor: pointer;
     letter-spacing: 1px;
     font-family: 'Noto Serif SC', serif;
-    box-shadow: 0 4px 20px var(--deity-glow), 0 2px 8px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 12px var(--deity-glow);
     transition: all 0.25s;
     -webkit-tap-highlight-color: transparent;
+    flex: 1;
+    max-width: 160px;
+    text-align: center;
   }
-  #share-btn:hover { transform: scale(1.06); box-shadow: 0 6px 28px var(--deity-glow); }
-  #share-btn:active { transform: scale(0.94); }
+  .toolbar-btn:hover { transform: scale(1.04); box-shadow: 0 4px 20px var(--deity-glow); }
+  .toolbar-btn:active { transform: scale(0.94); }
+
+  /* 分享按钮（隐藏状态由 JS 控制工具栏内的元素） */
+  #share-btn {
+    display: none; /* 祈福前隐藏，祈福后显示 */
+  }
 
   .share-card-logo { font-size: 36px; margin-bottom: 6px; }
   .share-card-site {
@@ -1020,10 +1073,10 @@
   }
   #install-close:hover { color: rgba(255,255,255,0.6); }
   @keyframes count-bounce {
-    0%   { transform: translateX(-50%) scale(1); }
-    40%  { transform: translateX(-50%) scale(1.35); }
-    70%  { transform: translateX(-50%) scale(0.92); }
-    100% { transform: translateX(-50%) scale(1); }
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    70%  { transform: scale(0.92); }
+    100% { transform: scale(1); }
   }
   .count-bounce {
     animation: count-bounce 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97);
@@ -1044,7 +1097,7 @@
     padding: 0 16px;
     position: relative;
     z-index: 10;
-    flex-shrink: 0;
+    flex-shrink: 1;
   }
 
   .wuxing-tag {
@@ -1290,8 +1343,8 @@
   /* ===== B: 按钮波纹Ripple ===== */
   .btn-worship {
     position: relative;
-    width: clamp(160px, 48vw, 190px);
-    height: clamp(52px, 7.5vh, 60px);
+    width: clamp(180px, 55%, 220px);
+    height: clamp(54px, 7.5vh, 64px);
     border: none;
     cursor: pointer;
     outline: none;
@@ -1318,7 +1371,7 @@
     background: rgba(0,0,0,0.5);
     border: 1px solid var(--rec-color, rgba(255,215,0,0.35));
     border-radius: 14px;
-    padding: 12px 16px;
+    padding: 10px 14px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1697,27 +1750,8 @@
      香火档案 Tab
   ===================================================== */
   #archive-btn {
-    position: fixed;
-    bottom: 28px;
-    left: 16px;
-    z-index: 200;
-    background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--deity-primary);
-    border-radius: 24px;
-    color: var(--deity-primary);
-    font-size: 12px;
-    padding: 10px 16px;
-    cursor: pointer;
-    letter-spacing: 1px;
-    font-family: 'Noto Serif SC', serif;
-    box-shadow: 0 4px 20px var(--deity-glow), 0 2px 8px rgba(0,0,0,0.4);
-    transition: all 0.25s;
-    -webkit-tap-highlight-color: transparent;
+    /* 由 .toolbar-btn 统一控制，这里只保留特殊覆盖 */
   }
-  #archive-btn:hover { transform: scale(1.06); box-shadow: 0 6px 28px var(--deity-glow); }
-  #archive-btn:active { transform: scale(0.94); }
 
   #archive-overlay {
     display: none;
@@ -2008,13 +2042,13 @@
     <div class="ob-field">
       <span class="ob-label">◆ 出生日期</span>
       <div class="ob-date-row">
-        <select class="ob-select" id="ob-birth-year"><option value="">年</option></select>
-        <select class="ob-select" id="ob-birth-month"><option value="">月</option></select>
-        <select class="ob-select" id="ob-birth-day"><option value="">日</option></select>
+        <select class="ob-select" id="ob-year"></select>
+        <select class="ob-select" id="ob-month"></select>
+        <select class="ob-select" id="ob-day"></select>
       </div>
-      <div class="ob-hint">系统将根据五行命盘推算今日最适神明</div>
+      <div class="ob-hint">选择您的出生年、月、日</div>
     </div>
-    <button class="ob-btn" onclick="submitOnboarding()">解 析 命 盘</button>
+    <button class="ob-btn" id="ob-submit-btn" onclick="submitOnboarding()">解 析 命 盘</button>
     <div class="ob-privacy">✦ 信息仅存于本机，不会上传 ✦</div>
   </div>
 </div>
@@ -2062,8 +2096,11 @@
   </div>
 </div>
 
-<!-- 分享按钮 -->
-<button id="share-btn" onclick="openShare()">✦ 分享祈福</button>
+<!-- 底部工具栏：香火档案 + 分享祈福 -->
+<div id="bottom-toolbar">
+  <button id="archive-btn" class="toolbar-btn" onclick="openArchive()">⛩ 香火档案</button>
+  <button id="share-btn" class="toolbar-btn" onclick="openShare()">✦ 分享祈福</button>
+</div>
 
 <!-- 分享遮罩 -->
 <div id="share-overlay">
@@ -2071,12 +2108,12 @@
     <div class="share-card-logo" id="shareIcon"></div>
     <div class="share-card-site">赛博神殿 · CYBER TEMPLE</div>
     <div class="share-card-deity" id="shareDeityName"></div>
-    <div class="share-card-reason" id="shareReason"></div>
-    <div class="share-card-detail" id="shareDetail"></div>
+    <div class="share-card-date" id="shareDate" style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.35);margin-bottom:6px;"></div>
     <div class="share-card-blessing" id="shareBlessing">按下祈福键，获取今日神明批示</div>
     <div class="share-card-footer">✦ 信息仅存于本机，不会上传 ✦</div>
     <div class="share-card-btns">
       <button class="share-copy-btn" onclick="copyShareText()">复制文字</button>
+      <button class="share-copy-btn" id="saveImgBtn" onclick="saveShareImage()" style="display:none">📷 保存图片</button>
       <button class="share-close-btn" onclick="closeShare()">关 闭</button>
     </div>
   </div>
@@ -2108,8 +2145,6 @@
   <div class="divine-msg" id="divineMsg"></div>
 </div>
 
-<!-- 香火档案按钮 -->
-<button id="archive-btn" onclick="openArchive()">⛩ 香火档案</button>
 
 <!-- 香火档案面板 -->
 <div id="archive-overlay">
@@ -2189,12 +2224,14 @@
         </div>
       </div>
     </div>
-    <div class="count-display" id="countDisplay">
-      累计祈福 <span id="countNum">0</span> 次
-    </div>
   </div>
 
-  <!-- 好感度星星移到 deity-frame 外，放在独立行 -->
+  <!-- 累计次数胶囊：独立flex行，不再绝对定位 -->
+  <div class="count-display" id="countDisplay">
+    今日 <span id="todayNum" style="color:var(--deity-primary)">0</span> · 累计 <span id="countNum">0</span> 次
+  </div>
+
+  <!-- 好感度星星：独立行 -->
   <div id="deity-affinity-bar">
     <span class="affinity-star" id="star0">★</span>
     <span class="affinity-star" id="star1">★</span>
@@ -3150,6 +3187,7 @@ let currentDeityIndex = 0;
 let isCooldown = false;
 let isSwitching = false; // 神明切换防竞态锁
 
+
 // 每个神明独立计数
 function getCount(id) { return parseInt(localStorage.getItem('cyber_count_' + id) || '0'); }
 function addCount(id) {
@@ -3157,6 +3195,27 @@ function addCount(id) {
   localStorage.setItem('cyber_count_' + id, n);
   return n;
 }
+
+// 今日祈福计数（按自然日清零）
+function getTodayKey() {
+  const d = new Date();
+  return `cyber_today_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+function getTodayCount() { return parseInt(localStorage.getItem(getTodayKey()) || '0'); }
+function addTodayCount() {
+  const k = getTodayKey();
+  const n = getTodayCount() + 1;
+  localStorage.setItem(k, n);
+  return n;
+}
+function updateCountDisplay(id) {
+  const total = getCount(id);
+  const today = getTodayCount();
+  const el = document.getElementById('countDisplay');
+  if (!el) return;
+  el.innerHTML = `今日 <span id="todayNum" style="color:var(--deity-primary)">${today}</span> · 累计 <span id="countNum">${total}</span> 次`;
+}
+
 
 // =====================================================
 // 粒子系统
@@ -3419,7 +3478,8 @@ function switchDeity(index, direction = 'left', animate = true) {
     document.getElementById('footerDeco').textContent = d.footer;
 
     // 更新计数
-    document.getElementById('countNum').textContent = getCount(d.id);
+    updateCountDisplay(d.id);
+
 
     // 更新神像
     document.getElementById('deityWrap').innerHTML = d.svgContent;
@@ -3477,12 +3537,16 @@ function worship() {
   if (isCooldown) return;
   isCooldown = true;
 
+  // 触觉反馈（移动端）：短-长-短 模拟叩首
+  if (navigator.vibrate) navigator.vibrate([40, 60, 80]);
+
   const d = DEITIES[currentDeityIndex];
 
   // 计数
   const n = addCount(d.id);
+  addTodayCount();
   const countDisplay = document.getElementById('countDisplay');
-  document.getElementById('countNum').textContent = n;
+  updateCountDisplay(d.id);
   countDisplay.classList.remove('count-bounce');
   void countDisplay.offsetWidth;
   countDisplay.classList.add('count-bounce');
@@ -3861,23 +3925,44 @@ function jumpToRecommended() {
 
 function submitOnboarding() {
   const nameEl = document.getElementById('ob-name');
-  const yearEl = document.getElementById('ob-birth-year');
-  const monthEl = document.getElementById('ob-birth-month');
-  const dayEl = document.getElementById('ob-birth-day');
-  const name = nameEl.value.trim();
-  const y = yearEl.value, m = monthEl.value, d = dayEl.value;
-  const birthStr = (y && m && d) ? `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}` : '';
+  const yearEl = document.getElementById('ob-year');
+  const monthEl = document.getElementById('ob-month');
+  const dayEl = document.getElementById('ob-day');
 
+  const name = nameEl ? nameEl.value.trim() : '';
+  const year = yearEl ? yearEl.value : '';
+  const month = monthEl ? monthEl.value : '';
+  const day = dayEl ? dayEl.value : '';
+
+  // 验证姓名
   if (!name) {
-    nameEl.focus();
-    nameEl.style.borderColor = 'rgba(255,45,85,0.8)';
-    setTimeout(() => nameEl.style.borderColor = '', 1200);
+    if (nameEl) {
+      nameEl.focus();
+      nameEl.style.borderColor = 'rgba(255,45,85,0.8)';
+      setTimeout(() => { nameEl.style.borderColor = ''; }, 1200);
+    }
     return;
   }
-  if (!birthStr) {
+
+  // 验证年月日
+  if (!year || !month || !day) {
     [yearEl, monthEl, dayEl].forEach(el => {
-      if (!el.value) { el.classList.add('error'); setTimeout(() => el.classList.remove('error'), 1200); }
+      if (el && !el.value) el.classList.add('error');
     });
+    setTimeout(() => {
+      [yearEl, monthEl, dayEl].forEach(el => { if (el) el.classList.remove('error'); });
+    }, 1200);
+    return;
+  }
+
+  const mm = month.padStart(2, '0');
+  const dd = day.padStart(2, '0');
+  const birthStr = `${year}-${mm}-${dd}`;
+
+  // 验证日期合法
+  const birthDate = new Date(birthStr + 'T00:00:00');
+  if (isNaN(birthDate.getTime())) {
+    if (dayEl) { dayEl.classList.add('error'); setTimeout(() => dayEl.classList.remove('error'), 1200); }
     return;
   }
 
@@ -3887,6 +3972,8 @@ function submitOnboarding() {
 
   const bar = document.getElementById('parsingBar');
   const stepEl = document.getElementById('parsingStep');
+  bar.style.width = '0%';
+
   const steps = [
     `正在读取 ${name} 的生辰信息...`,
     `计算 ${name} 的天干地支...`,
@@ -3895,28 +3982,22 @@ function submitOnboarding() {
     `解析完成 ✓`
   ];
 
-  // F: 赛博感进度条：先快速冲到75%，然后减速到92%，最后一次性完成
   let progress = 0;
   let stepIdx = 0;
   stepEl.textContent = steps[0];
 
-  // 阶段1：快速冲到72%（前1.2s）
-  // 阶段2：减速爬到92%（1.2s~2.2s）
-  // 阶段3：短暂停顿后瞬间100%
   const phase1Target = 72;
   const phase2Target = 92;
 
   function getIncrement(p) {
-    if (p < phase1Target) return 2.8;        // 快速
-    if (p < phase2Target) return 0.55;       // 减速
-    return 0;                                 // 等待爆发
+    if (p < phase1Target) return 2.8;
+    if (p < phase2Target) return 0.55;
+    return 0;
   }
 
   const interval = setInterval(() => {
     const inc = getIncrement(progress);
-    if (inc > 0) {
-      progress = Math.min(progress + inc, phase2Target);
-    }
+    if (inc > 0) progress = Math.min(progress + inc, phase2Target);
     bar.style.width = progress + '%';
     const newStepIdx = Math.min(Math.floor(progress / 22), steps.length - 2);
     if (newStepIdx !== stepIdx) {
@@ -3924,69 +4005,39 @@ function submitOnboarding() {
       stepEl.textContent = steps[stepIdx];
     }
     if (progress >= phase2Target) {
-      // 在92%卡顿一下，模拟"最后计算"
       clearInterval(interval);
       setTimeout(() => {
-        // 爆发冲到100%
-        bar.style.transition = 'width 0.25s cubic-bezier(0.4, 0, 0.2, 1)';
+        bar.style.transition = 'width 0.25s cubic-bezier(0.4,0,0.2,1)';
         bar.style.width = '100%';
         stepEl.textContent = steps[steps.length - 1];
         setTimeout(() => {
           bar.style.transition = '';
           overlay.style.display = 'none';
+          try {
+            saveUser(name, birthStr);
+            const rec = recommendDeity(name, birthDate);
+            saveRec(rec);
 
-          saveUser(name, birthStr);
-          const birthDate = new Date(birthStr + 'T00:00:00');
-          const rec = recommendDeity(name, birthDate);
-          saveRec(rec);
+            const targetIdx = DEITIES.findIndex(d => d.id === rec.deityId);
+            if (targetIdx >= 0) switchDeity(targetIdx, 'left', false);
 
-          // 先切换到推荐神明（无动画，直接到位）
-          const targetIdx = DEITIES.findIndex(d => d.id === rec.deityId);
-          if (targetIdx >= 0) switchDeity(targetIdx, 'left', false);
+            const screen = document.getElementById('onboarding-screen');
+            screen.classList.add('hidden');
+            setTimeout(() => { screen.style.display = 'none'; }, 650);
 
-          // 隐藏录入页
-          const screen = document.getElementById('onboarding-screen');
-          screen.classList.add('hidden');
-          setTimeout(() => { screen.style.display = 'none'; }, 650);
-
-          showRecommendBanner({ name }, rec);
-          showTodayWuxingBar();
-          document.getElementById('edit-profile-btn').style.display = 'block';
+            showRecommendBanner({ name }, rec);
+            showTodayWuxingBar();
+            document.getElementById('edit-profile-btn').style.display = 'block';
+          } catch(e) {
+            alert('命盘解析出错：' + e.message);
+          }
         }, 300);
       }, 380);
     }
-  }, 42); // ~42ms间隔，阶段1：72/(2.8/42*1000) ≈1.08s，阶段2更慢
+  }, 42);
 }
 
 function initUserSystem() {
-  // 动态填充年份选项（1924 ~ 当年-3）
-  const maxYear = new Date().getFullYear() - 3;
-  const yearSel = document.getElementById('ob-birth-year');
-  const monthSel = document.getElementById('ob-birth-month');
-  const daySel = document.getElementById('ob-birth-day');
-
-  for (let y = maxYear; y >= 1924; y--) {
-    const o = document.createElement('option'); o.value = y; o.textContent = y + '年';
-    yearSel.appendChild(o);
-  }
-  for (let m = 1; m <= 12; m++) {
-    const o = document.createElement('option'); o.value = m; o.textContent = m + '月';
-    monthSel.appendChild(o);
-  }
-  function fillDays(year, month) {
-    const cur = daySel.value;
-    while (daySel.options.length > 1) daySel.remove(1);
-    const days = year && month ? new Date(year, month, 0).getDate() : 31;
-    for (let d = 1; d <= days; d++) {
-      const o = document.createElement('option'); o.value = d; o.textContent = d + '日';
-      daySel.appendChild(o);
-    }
-    if (cur && +cur <= days) daySel.value = cur;
-  }
-  fillDays();
-  yearSel.addEventListener('change', () => fillDays(yearSel.value, monthSel.value));
-  monthSel.addEventListener('change', () => fillDays(yearSel.value, monthSel.value));
-
   const user = getStoredUser();
   if (!user) {
     // 首次：显示录入页
@@ -4041,8 +4092,6 @@ function showTodayWuxingBar() {
 function updateShareCard(d, rec) {
   document.getElementById('shareIcon').textContent = d.icon;
   document.getElementById('shareDeityName').textContent = d.name;
-  document.getElementById('shareReason').textContent = rec.reason;
-  document.getElementById('shareDetail').textContent = rec.detail;
   // 更新分享卡颜色变量
   const shareCard = document.getElementById('shareCard');
   shareCard.style.setProperty('--deity-primary', d.colors.primary);
@@ -4056,11 +4105,18 @@ function openShare() {
   const overlay = document.getElementById('share-overlay');
   overlay.classList.remove('closing');
   overlay.classList.add('active');
+  // 同步日期
+  const today = new Date();
+  const dateEl = document.getElementById('shareDate');
+  if (dateEl) dateEl.textContent = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
   // 如果已有祝福语则同步
   const currentBlessing = document.getElementById('blessingText');
   if (currentBlessing.classList.contains('show') && currentBlessing.textContent) {
     document.getElementById('shareBlessing').textContent = currentBlessing.textContent;
   }
+  // html2canvas 可用时显示"保存图片"按钮
+  const saveBtn = document.getElementById('saveImgBtn');
+  if (saveBtn) saveBtn.style.display = typeof html2canvas !== 'undefined' ? 'inline-block' : 'none';
 }
 
 function closeShare() {
@@ -4069,6 +4125,59 @@ function closeShare() {
   setTimeout(() => {
     overlay.classList.remove('active', 'closing');
   }, 250);
+}
+
+function saveShareImage() {
+  const card = document.getElementById('shareCard');
+  const btn = document.getElementById('saveImgBtn');
+  if (!card || typeof html2canvas === 'undefined') return;
+  const origText = btn.textContent;
+  btn.textContent = '生成中…';
+  btn.disabled = true;
+
+  // 临时隐藏按钮区，截图不含按钮
+  const btnsEl = card.querySelector('.share-card-btns');
+  if (btnsEl) btnsEl.style.display = 'none';
+
+  html2canvas(card, {
+    backgroundColor: null,
+    scale: 2,
+    useCORS: true,
+    logging: false,
+  }).then(canvas => {
+    if (btnsEl) btnsEl.style.display = '';
+    btn.textContent = origText;
+    btn.disabled = false;
+
+    const d = DEITIES[currentDeityIndex];
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`;
+    const filename = `cyber-temple-${d.id}-${dateStr}.png`;
+
+    if (navigator.canShare && navigator.canShare({ files: [] })) {
+      // 移动端原生分享
+      canvas.toBlob(blob => {
+        const file = new File([blob], filename, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: '赛博神殿祈福', text: '今日祈福批示' }).catch(() => downloadImg(canvas, filename));
+        } else { downloadImg(canvas, filename); }
+      });
+    } else {
+      downloadImg(canvas, filename);
+    }
+  }).catch(() => {
+    if (btnsEl) btnsEl.style.display = '';
+    btn.textContent = origText;
+    btn.disabled = false;
+    alert('截图失败，请手动截屏保存');
+  });
+}
+
+function downloadImg(canvas, filename) {
+  const a = document.createElement('a');
+  a.download = filename;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
 }
 
 // C: Banner点击涟漪 + 跳转推荐神明
@@ -4083,15 +4192,12 @@ function bannerTap() {
 
 function copyShareText() {
   const d = DEITIES[currentDeityIndex];
-  const reason = document.getElementById('shareReason').textContent;
-  const detail = document.getElementById('shareDetail').textContent;
   const blessing = document.getElementById('shareBlessing').textContent;
   const today = new Date();
   const dateStr = `${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
 
   const text = `【赛博神殿 · 今日祈福】${dateStr}\n\n` +
-    `✦ 今日推荐：${d.name}\n` +
-    `${reason}\n${detail}\n\n` +
+    `✦ 今日祈福：${d.name}\n\n` +
     `神明批示：${blessing}\n\n` +
     `⛩️ 赛博神殿 · CYBER TEMPLE`;
 
@@ -4168,12 +4274,18 @@ function resetProfile() {
     const banner = document.getElementById('recommend-banner');
     banner.classList.remove('visible');
     document.getElementById('share-btn').style.display = 'none';
+    // 清空分享卡旧内容
+    const sbEl = document.getElementById('shareBlessing');
+    if (sbEl) sbEl.textContent = '按下祈福键，获取今日神明批示';
 
     // 重置输入框
     document.getElementById('ob-name').value = '';
-    document.getElementById('ob-birth-year').value = '';
-    document.getElementById('ob-birth-month').value = '';
-    document.getElementById('ob-birth-day').value = '';
+    const yearEl = document.getElementById('ob-year');
+    const monthEl = document.getElementById('ob-month');
+    const dayEl = document.getElementById('ob-day');
+    if (yearEl) yearEl.selectedIndex = 0;
+    if (monthEl) monthEl.selectedIndex = 0;
+    if (dayEl) dayEl.selectedIndex = 0;
 
     // 显示录入页
     const screen = document.getElementById('onboarding-screen');
@@ -4185,18 +4297,66 @@ function resetProfile() {
 // =====================================================
 // 启动
 // =====================================================
-initDots();
-switchDeity(0, 'left', false);
-initUserSystem();
+function _initDateSelects() {
+  const yearEl = document.getElementById('ob-year');
+  const monthEl = document.getElementById('ob-month');
+  const dayEl = document.getElementById('ob-day');
+  if (!yearEl || !monthEl || !dayEl) return;
+
+  // 年：1924~2015
+  const curYear = new Date().getFullYear();
+  yearEl.innerHTML = '<option value="">年</option>';
+  for (let y = curYear - 10; y >= 1924; y--) {
+    yearEl.innerHTML += `<option value="${y}">${y}年</option>`;
+  }
+
+  // 月
+  monthEl.innerHTML = '<option value="">月</option>';
+  for (let m = 1; m <= 12; m++) {
+    monthEl.innerHTML += `<option value="${m}">${m}月</option>`;
+  }
+
+  // 日（动态，根据年月）
+  function updateDays() {
+    const y = parseInt(yearEl.value) || 2000;
+    const m = parseInt(monthEl.value) || 1;
+    const maxDay = new Date(y, m, 0).getDate();
+    const prev = parseInt(dayEl.value) || 0;
+    dayEl.innerHTML = '<option value="">日</option>';
+    for (let d = 1; d <= maxDay; d++) {
+      dayEl.innerHTML += `<option value="${d}">${d}日</option>`;
+    }
+    if (prev && prev <= maxDay) dayEl.value = prev;
+  }
+  updateDays();
+  yearEl.addEventListener('change', updateDays);
+  monthEl.addEventListener('change', updateDays);
+}
+
+function _boot() {
+  _initDateSelects();
+  try { initDots(); } catch(e) { console.error('[boot] initDots:', e); }
+  try { switchDeity(0, 'left', false); } catch(e) { console.error('[boot] switchDeity:', e); }
+  try { initUserSystem(); } catch(e) { console.error('[boot] initUserSystem:', e); }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _boot);
+} else {
+  _boot();
+}
 
 // =====================================================
 // PWA Service Worker 注册
 // =====================================================
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => console.log('[PWA] Service Worker 注册成功'))
-      .catch(e => console.log('[PWA] SW 注册失败:', e));
+  // 先注销所有旧 SW，再注册新的，确保拿到最新代码
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    Promise.all(regs.map(r => r.unregister())).then(() => {
+      navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('[PWA] Service Worker 注册成功'))
+        .catch(e => console.log('[PWA] SW 注册失败:', e));
+    });
   });
 }
 
@@ -4473,20 +4633,98 @@ function initTilt() {
     const ry = Math.max(-18, Math.min(18, e.gamma * 0.4));
     wrap.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
   });
+
+  // ★ 长按神像彩蛋：持续 800ms 触发神明私信
+  let longPressTimer = null;
+  function startLongPress() {
+    longPressTimer = setTimeout(() => {
+      longPressTimer = null;
+      triggerDeityWhisper();
+    }, 800);
+  }
+  function cancelLongPress() {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+  }
+  frame.addEventListener('mousedown', startLongPress);
+  frame.addEventListener('mouseup', cancelLongPress);
+  frame.addEventListener('mouseleave', cancelLongPress);
+  frame.addEventListener('touchstart', startLongPress, { passive: true });
+  frame.addEventListener('touchend', cancelLongPress);
+  frame.addEventListener('touchcancel', cancelLongPress);
 }
 
 // =====================================================
 // ★ 稀有事件 · 神明显灵（每100次触发）
 // =====================================================
 const DIVINE_MSGS = {
-  caishen:  ['财神降临！今日大吉大利，横财必至！', '赛博财神亲自显灵，此人财运冲顶，无可阻挡！'],
-  yuelao:   ['月老现身！你的红线已亲手绑定，缘分天注定！', '月老显灵，此人姻缘大旺，真爱触手可及！'],
-  wenchang: ['文昌显灵！智慧之光已降临，学业无往不利！', '文昌帝君现身加持，此人才华横溢，金榜题名！'],
-  yaowang:  ['药王降世！神药已入体，百毒不侵，健康永驻！', '药王亲临，此人生命力大幅提升，百病全消！'],
-  taibai:   ['太白金星亲降！天庭已批复，升职加薪，马到成功！', '太白显灵，天庭诏书已下，此人前途无量！'],
-  ouhuang:  ['欧皇娘娘降临！天选之人！今日运气爆棚无上限！', '欧皇现身！宇宙欧气全部加持于你，逢赌必赢！'],
-  tiangong: ['天公显灵！玉皇大帝亲自降福，万事顺遂！', '天庭圣旨降下！此人今年厄运全消，鸿运当头！'],
+  caishen:  ['财神降临！今日大吉大利，横财必至！', '赛博财神亲自显灵，此人财运冲顶，无可阻挡！', '💰 财神爷开口：此人今年偏财正财双丰收，钱包装不下！'],
+  yuelao:   ['月老现身！你的红线已亲手绑定，缘分天注定！', '月老显灵，此人姻缘大旺，真爱触手可及！', '🧵 月老批示：红线已系，良缘已定，只管大胆去爱！'],
+  wenchang: ['文昌显灵！智慧之光已降临，学业无往不利！', '文昌帝君现身加持，此人才华横溢，金榜题名！', '📚 文昌帝君开示：灵台清明，此次考试金榜有名，实力碾压！'],
+  yaowang:  ['药王降世！神药已入体，百毒不侵，健康永驻！', '药王亲临，此人生命力大幅提升，百病全消！', '💊 药王赐药：神药入体，今年百病不侵，精力充沛！'],
+  taibai:   ['太白金星亲降！天庭已批复，升职加薪，马到成功！', '太白显灵，天庭诏书已下，此人前途无量！', '📜 太白传旨：天庭人事令已批，升职快报即将到达，等好消息！'],
+  ouhuang:  ['欧皇娘娘降临！天选之人！今日运气爆棚无上限！', '欧皇现身！宇宙欧气全部加持于你，逢赌必赢！', '🌟 欧皇赐福：此人已被天选，今日欧气满格，逢凶化吉！'],
+  tiangong: ['天公显灵！玉皇大帝亲自降福，万事顺遂！', '天庭圣旨降下！此人今年厄运全消，鸿运当头！', '☁️ 玉皇大帝亲批：三界同庆，此人今年受天庭特别庇佑！'],
+  sanshan:  ['⛰️ 三山国王显圣！山河为证，此人今年逢难必解，诸事大吉！', '🌿 三山感应！国王降下山神庇佑，家宅平安，百邪不侵！', '💚 三山圣光降临！此人得三山国王亲点，出入平安，贵人相助！'],
+  mazu:     ['🌊 妈祖娘娘显灵！海天护体，今年一路顺风，前途无阻！', '⚓ 妈祖现身！娘娘亲手为你扬帆，此行风平浪静，平安归来！', '🕊️ 海上圣母显圣！妈祖庇佑在身，无论多大风浪，皆能安然渡过！'],
 };
+
+// =====================================================
+// ★ 长按彩蛋：神明私信
+// =====================================================
+const DEITY_WHISPERS = {
+  caishen:  ['📱 财神悄悄话：你最近有没有存钱？没有的话快存，福气不等人。', '💬 财神私信你：偷偷告诉你，今天买彩票的时机到了，但别超过50块。', '🔔 财神提醒：记账是财运的开关，先记第一笔，财神就来了。'],
+  yuelao:   ['📱 月老悄悄话：你喜欢的那个人，其实也在想你。', '💬 月老私信你：红线我已经绑了，你们之间只差一个主动。', '🔔 月老提醒：今天多笑一笑，缘分是笑出来的。'],
+  wenchang: ['📱 文昌悄悄话：你上次复习的那个章节，考试一定会考。', '💬 文昌私信你：静下心来，你比自己想象的聪明多了。', '🔔 文昌提醒：手机放下，书拿起来，你与别人的差距就在此刻。'],
+  yaowang:  ['📱 药王悄悄话：你最近睡眠够吗？凌晨12点前睡，我帮你调元气。', '💬 药王私信你：少喝奶茶，多喝热水，这不是废话，这是神谕。', '🔔 药王提醒：你的腰，需要注意了，坐直！'],
+  taibai:   ['📱 太白悄悄话：玉皇大帝已经知道你努力了，升职报告已在审批中。', '💬 太白私信你：你的上司最近心情不错，今天是提需求的好时机。', '🔔 太白提醒：职场机会来了别犹豫，天庭等你自己争气。'],
+  ouhuang:  ['📱 欧皇悄悄话：今天出门右转会遇到好事，试试？', '💬 欧皇私信你：你最近欧气值达到峰值，赶紧抽卡！', '🔔 欧皇提醒：欧气是流动的，多分享给朋友，反而会回来更多。'],
+  tiangong: ['📱 天公悄悄话：你今年的愿望，玉皇大帝亲眼看见了。', '💬 天公私信你：三界档案已记录你的虔诚，行善则福自来。', '🔔 天公提醒：做了好事别说出来，天庭自然会加到你的功德簿。'],
+  sanshan:  ['📱 三山国王悄悄话：出门在外注意安全，国王的眼睛一直在。', '💬 三山私信你：家里老人多问候几句，山神护的是整个家。', '🔔 三山提醒：今天遇到的陌生人，说不定是贵人，礼貌点。'],
+  mazu:     ['📱 妈祖悄悄话：要出远门了吗？平安符已经贴好，放心去。', '💬 妈祖私信你：风浪大的时候别慌，娘娘就在旁边护着。', '🔔 妈祖提醒：想家的时候就抬头看看月亮，妈祖也在看同一个月亮。'],
+};
+
+function triggerDeityWhisper() {
+  const d = DEITIES[currentDeityIndex];
+  const msgs = DEITY_WHISPERS[d.id] || ['神明悄悄对你说：今日大吉，诸事顺遂。'];
+  const msg = msgs[Math.floor(Math.random() * msgs.length)];
+
+  // 复用 achievement-toast 样式或新建 whisper toast
+  let toast = document.getElementById('whisper-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'whisper-toast';
+    toast.style.cssText = `
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+      z-index: 999; background: rgba(5,0,16,0.92); border: 1px solid var(--deity-primary);
+      border-radius: 16px; padding: 14px 18px; max-width: 310px; width: 90%;
+      color: rgba(255,255,255,0.9); font-size: 13px; line-height: 1.6;
+      font-family: 'Noto Serif SC', serif; letter-spacing: 0.5px;
+      box-shadow: 0 4px 24px var(--deity-glow), 0 2px 8px rgba(0,0,0,0.6);
+      opacity: 0; transition: opacity 0.4s, transform 0.4s; pointer-events: none;
+      text-align: center;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = msg;
+
+  // 清除旧 timer
+  if (toast._hideTimer) clearTimeout(toast._hideTimer);
+
+  // 入场
+  requestAnimationFrame(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateX(-50%) translateY(0)';
+  });
+
+  // 3.5s 后消失
+  toast._hideTimer = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 3500);
+
+  // 触觉反馈：轻震一下
+  if (navigator.vibrate) navigator.vibrate(30);
+}
 
 function triggerDivineReveal(deityId) {
   const d = DEITIES.find(x => x.id === deityId);
@@ -4758,7 +4996,7 @@ function importSaveCode() {
       renderArchive();
       // 刷新计数
       const d = DEITIES[currentDeityIndex];
-      if (d) document.getElementById('countNum').textContent = getCount(d.id);
+      if (d) updateCountDisplay(d.id);
     }, 1200);
   } catch(e) {
     tip.style.color = '#FF5252';
@@ -4774,6 +5012,64 @@ initTilt();
 updateAffinityDisplay(DEITIES[currentDeityIndex]?.id);
 // 初始化连续天数（如果今天已有祈福记录则算签到）
 if (DEITIES.some(d => getCount(d.id) > 0)) updateStreak();
+// 初始化计数显示
+updateCountDisplay(DEITIES[currentDeityIndex]?.id);
+
+// =====================================================
+// ★ 批示框开场白轮播（未祈福时显示动态提示）
+// =====================================================
+(function initIdleCarousel() {
+  const idleEl = document.getElementById('idleText');
+  const blessEl = document.getElementById('blessingText');
+  const IDLE_MSGS = [
+    '· 叩首三拜，求神赐福 ·',
+    '· 心诚则灵，按下祈福 ·',
+    '· 神明在位，恭候祈愿 ·',
+    '· 香火已备，静候神谕 ·',
+    '· 虔心祈福，好运自来 ·',
+    '· 今日吉时，宜祈福许愿 ·',
+  ];
+  let idx = 0;
+  let carouselTimer = null;
+
+  function showIdle() {
+    // 若已有批示内容则不覆盖
+    if (blessEl && blessEl.classList.contains('show')) return;
+    if (!idleEl) return;
+    idleEl.style.opacity = '0';
+    setTimeout(() => {
+      idx = (idx + 1) % IDLE_MSGS.length;
+      idleEl.textContent = IDLE_MSGS[idx];
+      idleEl.style.opacity = '1';
+    }, 600);
+  }
+
+  if (idleEl) {
+    idleEl.style.transition = 'opacity 0.6s ease';
+    carouselTimer = setInterval(showIdle, 3000);
+  }
+
+  // 祈福后停止轮播，直到切换神明
+  const origWorship = window.worship;
+  if (typeof origWorship === 'function') {
+    window.worship = function() {
+      if (carouselTimer) { clearInterval(carouselTimer); carouselTimer = null; }
+      origWorship.apply(this, arguments);
+    };
+  }
+
+  // 切换神明后恢复轮播
+  const origSwitch = window.switchDeity;
+  if (typeof origSwitch === 'function') {
+    window.switchDeity = function() {
+      origSwitch.apply(this, arguments);
+      if (!carouselTimer) {
+        setTimeout(() => { carouselTimer = setInterval(showIdle, 3000); }, 400);
+      }
+    };
+  }
+})();
+
 
 </script>
 </body>
