@@ -183,7 +183,11 @@
     font-weight: 900;
     line-height: 1.1;
     transition: all 0.5s;
-    filter: drop-shadow(0 0 16px var(--deity-glow));
+    background: linear-gradient(160deg, #ffffff 30%, var(--deity-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 18px var(--deity-glow)) drop-shadow(0 2px 4px rgba(0,0,0,0.8));
   }
 
   .title-en {
@@ -488,9 +492,462 @@
     .title { font-size: 30px; }
     .nav-arrow { width: 38px; height: 38px; font-size: 16px; }
   }
+
+  /* ===== 命盘录入页 ===== */
+  #onboarding-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: #03030f;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  #onboarding-screen.hidden {
+    opacity: 0;
+    transform: scale(1.05);
+    pointer-events: none;
+  }
+
+  .ob-scan-line {
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,229,255,0.04) 2px, rgba(0,229,255,0.04) 4px
+    );
+    pointer-events: none;
+    animation: scan-move 8s linear infinite;
+  }
+
+  @keyframes scan-move {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100px; }
+  }
+
+  .ob-logo {
+    font-size: 40px;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 0 16px rgba(255,215,0,0.6));
+    animation: ob-float 3s ease-in-out infinite;
+  }
+
+  @keyframes ob-float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .ob-title {
+    font-size: 22px;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 20px rgba(255,215,0,0.7);
+    letter-spacing: 4px;
+    text-align: center;
+  }
+
+  .ob-subtitle {
+    font-size: 11px;
+    color: rgba(0,229,255,0.7);
+    letter-spacing: 3px;
+    margin-top: 4px;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .ob-form {
+    width: 100%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .ob-field {
+    position: relative;
+  }
+
+  .ob-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: rgba(0,229,255,0.7);
+    margin-bottom: 7px;
+    display: block;
+  }
+
+  .ob-input {
+    width: 100%;
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.3);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-size: 16px;
+    color: #E8D5A3;
+    font-family: 'Noto Serif SC', serif;
+    letter-spacing: 1px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    -webkit-appearance: none;
+  }
+
+  .ob-input:focus {
+    border-color: rgba(0,229,255,0.8);
+    box-shadow: 0 0 12px rgba(0,229,255,0.2);
+  }
+
+  .ob-input::placeholder {
+    color: rgba(255,255,255,0.18);
+    font-size: 14px;
+  }
+
+  .ob-input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.7) sepia(1) saturate(2) hue-rotate(160deg);
+    opacity: 0.6;
+  }
+
+  .ob-hint {
+    font-size: 10px;
+    color: rgba(255,255,255,0.25);
+    margin-top: 5px;
+    letter-spacing: 1px;
+  }
+
+  .ob-btn {
+    width: 100%;
+    margin-top: 8px;
+    height: 54px;
+    border: none;
+    border-radius: 27px;
+    background: linear-gradient(135deg, #0a1a3a, #0d2d5e, #1a4a8a);
+    color: #E8D5A3;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    font-family: 'Noto Serif SC', serif;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 24px rgba(0,229,255,0.3), 0 0 48px rgba(0,229,255,0.1);
+    transition: transform 0.15s, box-shadow 0.3s;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .ob-btn::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 29px;
+    background: linear-gradient(135deg, #E8D5A3, #00E5FF, #FFD700, #E8D5A3);
+    z-index: -1;
+    animation: border-pulse 2s ease-in-out infinite;
+  }
+
+  .ob-btn:active { transform: scale(0.96); }
+
+  .ob-privacy {
+    font-size: 10px;
+    color: rgba(255,255,255,0.15);
+    text-align: center;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  /* ===== 今日推荐 Banner ===== */
+  #recommend-banner {
+    display: none;
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    z-index: 10;
+    margin: 0 16px;
+    padding: 0 16px;
+  }
+
+  .rec-card {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--rec-color, rgba(255,215,0,0.35));
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .rec-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at left, var(--rec-glow, rgba(255,215,0,0.08)), transparent 70%);
+    pointer-events: none;
+  }
+
+  .rec-icon-wrap {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--rec-color, rgba(255,215,0,0.4));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: 0 0 12px var(--rec-glow, rgba(255,215,0,0.3));
+    animation: rec-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes rec-pulse {
+    0%,100% { box-shadow: 0 0 8px var(--rec-glow, rgba(255,215,0,0.3)); }
+    50% { box-shadow: 0 0 20px var(--rec-glow, rgba(255,215,0,0.5)); }
+  }
+
+  .rec-content { flex: 1; min-width: 0; }
+
+  .rec-tag {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--rec-color, #FFD700);
+    opacity: 0.7;
+    margin-bottom: 2px;
+  }
+
+  .rec-name {
+    font-size: 15px;
+    font-weight: 900;
+    color: var(--rec-color, #FFD700);
+    text-shadow: 0 0 10px var(--rec-glow, rgba(255,215,0,0.5));
+    letter-spacing: 2px;
+  }
+
+  .rec-reason {
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 3px;
+    line-height: 1.5;
+    letter-spacing: 0.3px;
+  }
+
+  .rec-user-name {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 5px;
+  }
+
+  /* ===== 今日五行旺色标签 ===== */
+  #today-wuxing-bar {
+    display: none;
+    width: 100%;
+    max-width: 420px;
+    padding: 0 16px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .wuxing-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 5px 14px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 0;
+  }
+
+  .wuxing-tag .wx-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 6px currentColor;
+  }
+
+  /* ===== 修改信息按钮 ===== */
+  #edit-profile-btn {
+    position: fixed;
+    top: 14px;
+    right: 16px;
+    z-index: 200;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    color: rgba(255,255,255,0.45);
+    font-size: 11px;
+    padding: 5px 12px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    font-family: 'Noto Serif SC', serif;
+    transition: all 0.2s;
+    display: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  #edit-profile-btn:hover {
+    border-color: rgba(255,255,255,0.35);
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* ===== 解析动画覆盖层 ===== */
+  #parsing-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1100;
+    background: #03030f;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .parsing-spinner {
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+
+  .parsing-spinner::before,
+  .parsing-spinner::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+  }
+
+  .parsing-spinner::before {
+    inset: 0;
+    border: 2px solid rgba(0,229,255,0.15);
+  }
+
+  .parsing-spinner::after {
+    inset: 0;
+    border: 2px solid transparent;
+    border-top-color: #00E5FF;
+    border-right-color: rgba(0,229,255,0.4);
+    animation: spinner-spin 0.9s linear infinite;
+  }
+
+  .parsing-inner-ring {
+    position: absolute;
+    inset: 14px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-bottom-color: #FFD700;
+    border-left-color: rgba(255,215,0,0.4);
+    animation: spinner-spin 1.4s linear infinite reverse;
+  }
+
+  .parsing-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    animation: ob-float 2s ease-in-out infinite;
+  }
+
+  @keyframes spinner-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .parsing-text {
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: rgba(0,229,255,0.8);
+    text-shadow: 0 0 12px rgba(0,229,255,0.5);
+    animation: parsing-blink 1.2s ease-in-out infinite;
+  }
+
+  @keyframes parsing-blink {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .parsing-progress {
+    width: 200px;
+    height: 2px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .parsing-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #00E5FF, #FFD700);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 8px rgba(0,229,255,0.6);
+  }
+
+  .parsing-step {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.3);
+    min-height: 16px;
+  }
+
+  /* ===== Banner 淡入动画 ===== */
+  #recommend-banner {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  #recommend-banner.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 </style>
 </head>
 <body>
+
+<!-- 解析动画覆盖层 -->
+<div id="parsing-overlay">
+  <div class="parsing-spinner">
+    <div class="parsing-inner-ring"></div>
+    <div class="parsing-icon">⛩️</div>
+  </div>
+  <div class="parsing-text">命盘解析中</div>
+  <div class="parsing-progress"><div class="parsing-progress-bar" id="parsingBar"></div></div>
+  <div class="parsing-step" id="parsingStep"></div>
+</div>
+
+<!-- 命盘录入页 -->
+<div id="onboarding-screen">
+  <div class="ob-scan-line"></div>
+  <div class="ob-logo">⛩️</div>
+  <div class="ob-title">赛博神殿</div>
+  <div class="ob-subtitle">CYBER TEMPLE · 命盘解析系统</div>
+
+  <div class="ob-form">
+    <div class="ob-field">
+      <span class="ob-label">◆ 您的名字</span>
+      <input class="ob-input" id="ob-name" type="text" placeholder="请输入您的姓名" maxlength="10" autocomplete="off">
+    </div>
+    <div class="ob-field">
+      <span class="ob-label">◆ 出生日期</span>
+      <input class="ob-input" id="ob-birth" type="date" min="1924-01-01">
+      <div class="ob-hint">系统将根据五行命盘推算今日最适神明</div>
+    </div>
+    <button class="ob-btn" onclick="submitOnboarding()">解 析 命 盘</button>
+    <div class="ob-privacy">✦ 信息仅存于本机，不会上传 ✦</div>
+  </div>
+</div>
+
+<!-- 修改信息按钮 -->
+<button id="edit-profile-btn" onclick="resetProfile()">修改信息</button>
 
 <div class="grid-bg" id="gridBg"></div>
 <canvas id="particles"></canvas>
@@ -513,6 +970,29 @@
     letter-spacing:1px;white-space:nowrap">立即安装</button>
   <button id="install-close" style="background:none;border:none;color:rgba(255,255,255,0.3);
     font-size:18px;cursor:pointer;padding:4px;line-height:1">×</button>
+</div>
+
+<!-- 今日五行旺色标签 -->
+<div id="today-wuxing-bar">
+  <div class="wuxing-tag" id="todayWuxingTag">
+    <span class="wx-dot" id="todayWxDot"></span>
+    <span id="todayWxText"></span>
+  </div>
+</div>
+
+<!-- 今日推荐 Banner -->
+<div id="recommend-banner">
+  <div class="rec-user-name" id="recUserName"></div>
+  <div class="rec-card" id="recCard">
+    <div class="rec-icon-wrap" id="recIcon"></div>
+    <div class="rec-content">
+      <div class="rec-tag">◆ 今日命盘推荐</div>
+      <div class="rec-name" id="recName"></div>
+      <div class="rec-reason" id="recReason"></div>
+      <div class="rec-reason" id="recDetail" style="opacity:0.4;font-size:10px;margin-top:1px;"></div>
+    </div>
+
+  </div>
 </div>
 
 <!-- 左右切换导航 -->
@@ -1608,10 +2088,369 @@ document.addEventListener('keydown', e => {
 });
 
 // =====================================================
+// 命盘系统 · 五行推荐算法
+// =====================================================
+
+// 五行：木火土金水 对应数字 0-4
+// 天干五行映射
+const TIANGAN_WX = [2,3,2,3,4,4,0,0,1,1]; // 甲乙丙丁戊己庚辛壬癸
+// 地支五行映射
+const DIZHI_WX = [2,1,2,4,3,3,4,0,0,1,1,2]; // 子丑寅卯辰巳午未申酉戌亥
+
+// 五行名称
+const WX_NAME = ['木','火','土','金','水'];
+
+// 五行对应神明 id（一个五行可对应多个神明优先级）
+const WX_TO_DEITY = {
+  0: 'wenchang',  // 木 → 文昌（文教、生长）
+  1: 'taibai',    // 火 → 太白（事业、光明）
+  2: 'tiangong',  // 土 → 天公（大地、顺遂）
+  3: 'caishen',   // 金 → 财神（财富、金属）
+  4: 'yuelao',    // 水 → 月老（姻缘、流动）
+};
+
+// 五行缺陷对应含义
+const WX_LACK_REASON = {
+  0: { lack: '命中缺木，今日木旺', detail: '宜求文昌帝君，助文思大开、智慧增长' },
+  1: { lack: '命中缺火，今日火旺', detail: '宜求太白金星，助事业腾飞、职场高升' },
+  2: { lack: '命中缺土，今日土旺', detail: '宜求天公，祈万事顺遂、四季平安' },
+  3: { lack: '命中缺金，今日金旺', detail: '宜求财神爷，祈财运亨通、金银滚滚' },
+  4: { lack: '命中缺水，今日水旺', detail: '宜求月老，求姻缘红线、桃花喜缘' },
+};
+
+// 欧皇娘娘特殊触发：生日为今天月日 or 名字含"福/旺/欧"
+function checkOuhuang(name, birthDate) {
+  const today = new Date();
+  const bm = birthDate.getMonth();
+  const bd = birthDate.getDate();
+  if (bm === today.getMonth() && bd === today.getDate()) return true;
+  if (/[福旺欧运吉]/u.test(name)) return true;
+  return false;
+}
+
+// 药王特殊触发：出生月日与今日月日差 ≤7天
+function checkYaowang(birthDate) {
+  const today = new Date();
+  // 取今年的生日日期来比较
+  const thisYearBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+  const diffDaysYaowang = Math.abs(today - thisYearBirthday) / 86400000;
+  // 也考虑去年/明年生日
+  const prevYearBirthday = new Date(today.getFullYear() - 1, birthDate.getMonth(), birthDate.getDate());
+  const nextYearBirthday = new Date(today.getFullYear() + 1, birthDate.getMonth(), birthDate.getDate());
+  const minDiff = Math.min(
+    Math.abs(today - thisYearBirthday),
+    Math.abs(today - prevYearBirthday),
+    Math.abs(today - nextYearBirthday)
+  ) / 86400000;
+  return minDiff <= 7;
+}
+
+/**
+ * 根据出生日期计算生辰八字中的五行缺失（简化版：只用年柱+月柱）
+ * 返回缺失五行数组（取数量最少的）
+ */
+function calcLackingWuxing(birthDate) {
+  const year = birthDate.getFullYear();
+  const month = birthDate.getMonth() + 1;
+
+  // 年干支
+  const yearStem = (year - 4) % 10;
+  const yearBranch = (year - 4) % 12;
+
+  // 月干支（粗略：以实际月份地支为准，干根据年推）
+  const monthBranchIndex = (month + 1) % 12; // 寅月为正月，index=2 映射
+  const monthStem = ((year - 4) % 5 * 2 + (month - 1)) % 10;
+
+  // 日柱（以出生年月日的总天数推算）
+  const baseDate = new Date(1900, 0, 31); // 庚子年甲辰日基准
+  const diffDays = Math.floor((birthDate - baseDate) / 86400000);
+  const dayStem = ((diffDays % 10) + 10) % 10;
+  const dayBranch = ((diffDays % 12) + 12) % 12;
+
+  // 统计五行出现次数（年柱+月柱+日柱，各天干+地支）
+  const wxCount = [0, 0, 0, 0, 0];
+  [yearStem, monthStem, dayStem].forEach(s => wxCount[TIANGAN_WX[s]]++);
+  [yearBranch, monthBranchIndex, dayBranch].forEach(b => wxCount[DIZHI_WX[b]]++);
+
+  // 找数量最少的五行
+  const minVal = Math.min(...wxCount);
+  const lacking = wxCount.map((v, i) => v === minVal ? i : -1).filter(i => i >= 0);
+  return lacking;
+}
+
+/**
+ * 今日日期加权：根据今日农历/公历日期影响推荐
+ * 简化：用 (月+日) mod 5 作为今日旺盛五行偏移
+ */
+function getTodayBoostWuxing() {
+  const t = new Date();
+  return (t.getMonth() + t.getDate()) % 5;
+}
+
+/**
+ * 综合算法：推荐神明
+ */
+function recommendDeity(name, birthDate) {
+  // 特殊触发优先
+  if (checkOuhuang(name, birthDate)) {
+    return {
+      deityId: 'ouhuang',
+      reason: '✨ 欧皇娘娘感应到你的气场',
+      detail: '今日欧气爆棚，命盘显示极强偏财运，宜求欧皇娘娘附身'
+    };
+  }
+  if (checkYaowang(birthDate)) {
+    return {
+      deityId: 'yaowang',
+      reason: '🌿 药王本月与你生月相合',
+      detail: '生月与今月同行，药王特感应，宜求护体强身、百毒不侵'
+    };
+  }
+
+  // 五行缺失计算
+  const lacking = calcLackingWuxing(birthDate);
+  const todayBoost = getTodayBoostWuxing();
+
+  // 优先选今日旺且命中缺的五行
+  let chosen = lacking.includes(todayBoost) ? todayBoost : lacking[0];
+
+  // 用姓名笔画数微调（取名字第一个字的Unicode码模5）
+  if (name && name.length > 0) {
+    const charCode = name.charCodeAt(0);
+    const nameWx = charCode % 5;
+    // 如果名字五行也缺失，优先
+    if (lacking.includes(nameWx)) chosen = nameWx;
+  }
+
+  const deityId = WX_TO_DEITY[chosen];
+  const wxInfo = WX_LACK_REASON[chosen];
+  return {
+    deityId,
+    reason: `⚡ ${wxInfo.lack}`,
+    detail: wxInfo.detail
+  };
+}
+
+// =====================================================
+// 命盘存储与 UI
+// =====================================================
+
+let recommendedDeityIndex = -1;
+
+function getStoredUser() {
+  try {
+    const raw = localStorage.getItem('cyber_user_profile');
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+function saveUser(name, birthStr) {
+  localStorage.setItem('cyber_user_profile', JSON.stringify({ name, birth: birthStr }));
+}
+
+function getTodayKey() {
+  const t = new Date();
+  return `${t.getFullYear()}-${t.getMonth()+1}-${t.getDate()}`;
+}
+
+function getStoredRec() {
+  try {
+    const raw = localStorage.getItem('cyber_today_rec');
+    if (!raw) return null;
+    const rec = JSON.parse(raw);
+    if (rec.date !== getTodayKey()) return null;
+    return rec;
+  } catch { return null; }
+}
+
+function saveRec(rec) {
+  localStorage.setItem('cyber_today_rec', JSON.stringify({ date: getTodayKey(), ...rec }));
+}
+
+function showRecommendBanner(user, rec) {
+  const deityIndex = DEITIES.findIndex(d => d.id === rec.deityId);
+  if (deityIndex < 0) return;
+  recommendedDeityIndex = deityIndex;
+  const d = DEITIES[deityIndex];
+
+  const banner = document.getElementById('recommend-banner');
+  const card = document.getElementById('recCard');
+
+  // 设置颜色变量
+  card.style.setProperty('--rec-color', d.colors.primary);
+  card.style.setProperty('--rec-glow', d.colors.glow);
+
+  document.getElementById('recUserName').textContent = `◈ ${user.name} 的今日命盘`;
+  document.getElementById('recIcon').textContent = d.icon;
+  document.getElementById('recName').textContent = d.name;
+  document.getElementById('recReason').textContent = rec.reason;
+  document.getElementById('recDetail').textContent = rec.detail;
+  banner.style.display = 'block';
+  // 淡入动画
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => banner.classList.add('visible'));
+  });
+}
+
+function jumpToRecommended() {
+  if (recommendedDeityIndex < 0) return;
+  const dir = recommendedDeityIndex > currentDeityIndex ? 'left' : 'right';
+  switchDeity(recommendedDeityIndex, dir);
+  // 滚动到神明区
+  document.getElementById('mainContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function submitOnboarding() {
+  const nameEl = document.getElementById('ob-name');
+  const birthEl = document.getElementById('ob-birth');
+  const name = nameEl.value.trim();
+  const birthStr = birthEl.value;
+
+  if (!name) {
+    nameEl.focus();
+    nameEl.style.borderColor = 'rgba(255,45,85,0.8)';
+    setTimeout(() => nameEl.style.borderColor = '', 1200);
+    return;
+  }
+  if (!birthStr) {
+    birthEl.focus();
+    birthEl.style.borderColor = 'rgba(255,45,85,0.8)';
+    setTimeout(() => birthEl.style.borderColor = '', 1200);
+    return;
+  }
+
+  // 显示解析动画
+  const overlay = document.getElementById('parsing-overlay');
+  overlay.style.display = 'flex';
+
+  const bar = document.getElementById('parsingBar');
+  const stepEl = document.getElementById('parsingStep');
+  const steps = [
+    '正在读取生辰信息...',
+    '计算天干地支...',
+    '分析五行命盘...',
+    '匹配今日神明...',
+    '解析完成 ✓'
+  ];
+
+  let progress = 0;
+  let stepIdx = 0;
+  stepEl.textContent = steps[0];
+
+  const interval = setInterval(() => {
+    progress += 2;
+    bar.style.width = progress + '%';
+    const newStepIdx = Math.min(Math.floor(progress / 22), steps.length - 1);
+    if (newStepIdx !== stepIdx) {
+      stepIdx = newStepIdx;
+      stepEl.textContent = steps[stepIdx];
+    }
+    if (progress >= 100) {
+      clearInterval(interval);
+      setTimeout(() => {
+        overlay.style.display = 'none';
+
+        saveUser(name, birthStr);
+        const birthDate = new Date(birthStr + 'T00:00:00');
+        const rec = recommendDeity(name, birthDate);
+        saveRec(rec);
+
+        // 先切换到推荐神明（无动画，直接到位）
+        const targetIdx = DEITIES.findIndex(d => d.id === rec.deityId);
+        if (targetIdx >= 0) switchDeity(targetIdx, 'left', false);
+
+        // 隐藏录入页
+        const screen = document.getElementById('onboarding-screen');
+        screen.classList.add('hidden');
+        setTimeout(() => { screen.style.display = 'none'; }, 650);
+
+        showRecommendBanner({ name }, rec);
+        showTodayWuxingBar();
+        document.getElementById('edit-profile-btn').style.display = 'block';
+      }, 300);
+    }
+  }, 50); // 50ms * 50次 = 2.5s
+}
+
+function initUserSystem() {
+  // 动态设置日期 max（当年 - 3岁）
+  const maxYear = new Date().getFullYear() - 3;
+  document.getElementById('ob-birth').setAttribute('max', `${maxYear}-12-31`);
+
+  const user = getStoredUser();
+  if (!user) {
+    // 首次：显示录入页
+    return;
+  }
+  // 老用户：直接隐藏录入页
+  const screen = document.getElementById('onboarding-screen');
+  screen.style.display = 'none';
+  document.getElementById('edit-profile-btn').style.display = 'block';
+
+  // 读取或重新计算今日推荐
+  let rec = getStoredRec();
+  if (!rec) {
+    const birthDate = new Date(user.birth + 'T00:00:00');
+    rec = recommendDeity(user.name, birthDate);
+    saveRec(rec);
+  }
+  // 直接定位到推荐神明
+  const targetIdx = DEITIES.findIndex(d => d.id === rec.deityId);
+  if (targetIdx >= 0) switchDeity(targetIdx, 'left', false);
+
+  showRecommendBanner(user, rec);
+  showTodayWuxingBar();
+}
+
+// 今日五行旺色
+const WX_COLOR = ['#00C853','#FF4444','#D4A84B','#E8D5A3','#00BFFF'];
+const WX_BG_COLOR = ['rgba(0,200,83,0.25)','rgba(255,68,68,0.25)','rgba(212,168,75,0.25)','rgba(232,213,163,0.25)','rgba(0,191,255,0.25)'];
+const WX_LABEL = ['木','火','土','金','水'];
+const WX_EMOJI = ['🌿','🔥','🟤','✨','💧'];
+
+function showTodayWuxingBar() {
+  const todayBoost = getTodayBoostWuxing();
+  const bar = document.getElementById('today-wuxing-bar');
+  const dot = document.getElementById('todayWxDot');
+  const text = document.getElementById('todayWxText');
+
+  dot.style.backgroundColor = WX_COLOR[todayBoost];
+  dot.style.color = WX_COLOR[todayBoost];
+  text.textContent = `今日${WX_EMOJI[todayBoost]} ${WX_LABEL[todayBoost]}旺 · 宜拜${DEITIES.find(d=>d.id===WX_TO_DEITY[todayBoost])?.name || ''}`;
+
+  bar.style.display = 'block';
+}
+
+function resetProfile() {
+  if (!confirm('确定要重新填写命盘信息吗？')) return;
+  localStorage.removeItem('cyber_user_profile');
+  localStorage.removeItem('cyber_today_rec');
+
+  // 隐藏五行条和修改按钮
+  document.getElementById('today-wuxing-bar').style.display = 'none';
+  document.getElementById('edit-profile-btn').style.display = 'none';
+
+  // 隐藏 banner
+  const banner = document.getElementById('recommend-banner');
+  banner.classList.remove('visible');
+  setTimeout(() => { banner.style.display = 'none'; }, 600);
+
+  // 重置输入框
+  document.getElementById('ob-name').value = '';
+  document.getElementById('ob-birth').value = '';
+
+  // 显示录入页
+  const screen = document.getElementById('onboarding-screen');
+  screen.style.display = 'flex';
+  screen.classList.remove('hidden');
+}
+
+// =====================================================
 // 启动
 // =====================================================
 initDots();
 switchDeity(0, 'left', false);
+initUserSystem();
 
 // =====================================================
 // PWA Service Worker 注册
