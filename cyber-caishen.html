@@ -724,6 +724,44 @@
     opacity: 0.6;
   }
 
+  /* 自定义年月日下拉 */
+  .ob-date-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .ob-select {
+    flex: 1;
+    background: rgba(0,229,255,0.04);
+    border: 1px solid rgba(0,229,255,0.3);
+    border-radius: 8px;
+    padding: 13px 8px;
+    font-size: 16px;
+    color: #E8D5A3;
+    font-family: 'Noto Serif SC', serif;
+    letter-spacing: 1px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    text-align: center;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+  }
+
+  .ob-select:focus {
+    border-color: rgba(0,229,255,0.8);
+    box-shadow: 0 0 12px rgba(0,229,255,0.2);
+  }
+
+  .ob-select option {
+    background: #0a0a1e;
+    color: #E8D5A3;
+  }
+
+  .ob-select.error {
+    border-color: rgba(255,45,85,0.8);
+  }
+
   .ob-hint {
     font-size: 10px;
     color: rgba(255,255,255,0.25);
@@ -1969,7 +2007,11 @@
     </div>
     <div class="ob-field">
       <span class="ob-label">◆ 出生日期</span>
-      <input class="ob-input" id="ob-birth" type="date" min="1924-01-01">
+      <div class="ob-date-row">
+        <select class="ob-select" id="ob-birth-year"><option value="">年</option></select>
+        <select class="ob-select" id="ob-birth-month"><option value="">月</option></select>
+        <select class="ob-select" id="ob-birth-day"><option value="">日</option></select>
+      </div>
       <div class="ob-hint">系统将根据五行命盘推算今日最适神明</div>
     </div>
     <button class="ob-btn" onclick="submitOnboarding()">解 析 命 盘</button>
@@ -3819,9 +3861,12 @@ function jumpToRecommended() {
 
 function submitOnboarding() {
   const nameEl = document.getElementById('ob-name');
-  const birthEl = document.getElementById('ob-birth');
+  const yearEl = document.getElementById('ob-birth-year');
+  const monthEl = document.getElementById('ob-birth-month');
+  const dayEl = document.getElementById('ob-birth-day');
   const name = nameEl.value.trim();
-  const birthStr = birthEl.value;
+  const y = yearEl.value, m = monthEl.value, d = dayEl.value;
+  const birthStr = (y && m && d) ? `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}` : '';
 
   if (!name) {
     nameEl.focus();
@@ -3830,9 +3875,9 @@ function submitOnboarding() {
     return;
   }
   if (!birthStr) {
-    birthEl.focus();
-    birthEl.style.borderColor = 'rgba(255,45,85,0.8)';
-    setTimeout(() => birthEl.style.borderColor = '', 1200);
+    [yearEl, monthEl, dayEl].forEach(el => {
+      if (!el.value) { el.classList.add('error'); setTimeout(() => el.classList.remove('error'), 1200); }
+    });
     return;
   }
 
@@ -3914,9 +3959,33 @@ function submitOnboarding() {
 }
 
 function initUserSystem() {
-  // 动态设置日期 max（当年 - 3岁）
+  // 动态填充年份选项（1924 ~ 当年-3）
   const maxYear = new Date().getFullYear() - 3;
-  document.getElementById('ob-birth').setAttribute('max', `${maxYear}-12-31`);
+  const yearSel = document.getElementById('ob-birth-year');
+  const monthSel = document.getElementById('ob-birth-month');
+  const daySel = document.getElementById('ob-birth-day');
+
+  for (let y = maxYear; y >= 1924; y--) {
+    const o = document.createElement('option'); o.value = y; o.textContent = y + '年';
+    yearSel.appendChild(o);
+  }
+  for (let m = 1; m <= 12; m++) {
+    const o = document.createElement('option'); o.value = m; o.textContent = m + '月';
+    monthSel.appendChild(o);
+  }
+  function fillDays(year, month) {
+    const cur = daySel.value;
+    while (daySel.options.length > 1) daySel.remove(1);
+    const days = year && month ? new Date(year, month, 0).getDate() : 31;
+    for (let d = 1; d <= days; d++) {
+      const o = document.createElement('option'); o.value = d; o.textContent = d + '日';
+      daySel.appendChild(o);
+    }
+    if (cur && +cur <= days) daySel.value = cur;
+  }
+  fillDays();
+  yearSel.addEventListener('change', () => fillDays(yearSel.value, monthSel.value));
+  monthSel.addEventListener('change', () => fillDays(yearSel.value, monthSel.value));
 
   const user = getStoredUser();
   if (!user) {
@@ -4102,7 +4171,9 @@ function resetProfile() {
 
     // 重置输入框
     document.getElementById('ob-name').value = '';
-    document.getElementById('ob-birth').value = '';
+    document.getElementById('ob-birth-year').value = '';
+    document.getElementById('ob-birth-month').value = '';
+    document.getElementById('ob-birth-day').value = '';
 
     // 显示录入页
     const screen = document.getElementById('onboarding-screen');
