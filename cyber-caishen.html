@@ -32,15 +32,31 @@
 
   body {
     background: var(--bg);
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     font-family: 'Noto Serif SC', 'Songti SC', serif;
-    overflow-x: hidden;
     position: relative;
     transition: background 0.6s ease;
   }
+
+  /* ===== 页面主滚动容器 ===== */
+  #app-scroll {
+    flex: 1;
+    width: 100%;
+    height: 0; /* 配合 flex:1 精确填满剩余高度（手机端） */
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    position: relative;
+  }
+  #app-scroll::-webkit-scrollbar { display: none; }
 
   body::before {
     content: '';
@@ -89,20 +105,21 @@
     z-index: 10;
     width: 100%;
     max-width: 420px;
-    padding: 14px 16px 0;
+    padding: clamp(6px, 1.5vh, 14px) 16px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-shrink: 0;
   }
 
   .nav-arrow {
-    width: 44px;
-    height: 44px;
+    width: clamp(36px, 5.5vw, 44px);
+    height: clamp(36px, 5.5vw, 44px);
     border: 1px solid var(--deity-border);
     border-radius: 50%;
     background: rgba(0,0,0,0.5);
     color: var(--deity-primary);
-    font-size: 18px;
+    font-size: clamp(15px, 2.2vw, 18px);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -164,27 +181,28 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 18px;
-    padding: 12px 16px 24px;
+    gap: clamp(8px, 1.6vh, 18px);
+    padding: clamp(6px, 1vh, 12px) 16px clamp(16px, 2vh, 28px);
     max-width: 420px;
     width: 100%;
+    flex: 1;
   }
 
   /* ===== 标题区 ===== */
-  .title-area { text-align: center; }
+  .title-area { text-align: center; flex-shrink: 0; }
 
   .subtitle {
-    font-size: 10px;
+    font-size: clamp(9px, 1.2vh, 10px);
     letter-spacing: 5px;
     color: var(--deity-secondary);
     text-shadow: 0 0 8px var(--deity-secondary);
-    margin-bottom: 6px;
+    margin-bottom: clamp(2px, 0.5vh, 6px);
     opacity: 0.8;
     transition: all 0.5s;
   }
 
   .title {
-    font-size: 36px;
+    font-size: clamp(26px, 5vh, 36px);
     font-weight: 900;
     line-height: 1.1;
     transition: all 0.5s;
@@ -196,9 +214,9 @@
   }
 
   .title-en {
-    font-size: 11px;
+    font-size: clamp(9px, 1.2vh, 11px);
     letter-spacing: 3px;
-    margin-top: 4px;
+    margin-top: clamp(2px, 0.4vh, 4px);
     color: var(--deity-primary);
     opacity: 0.5;
     transition: all 0.5s;
@@ -207,8 +225,18 @@
   /* ===== 神像区 ===== */
   .deity-frame {
     position: relative;
-    width: 200px;
-    height: 200px;
+    width: clamp(150px, 26vh, 200px);
+    height: clamp(150px, 26vh, 200px);
+    perspective: 600px;
+    flex-shrink: 0;
+  }
+
+  #deityTiltWrap {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: rotateX(0deg) rotateY(0deg);
+    transition: transform 0.1s ease-out;
   }
 
   .halo-outer {
@@ -309,11 +337,12 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 10px;
+    font-size: clamp(9px, 1.2vh, 10px);
     color: var(--deity-secondary);
     opacity: 0.7;
     letter-spacing: 2px;
     transition: all 0.5s;
+    flex-shrink: 0;
   }
 
   .status-dot {
@@ -333,16 +362,17 @@
   /* ===== 祝福语区 ===== */
   .blessing-box {
     width: 100%;
-    min-height: 84px;
+    min-height: clamp(64px, 10vh, 84px);
     background: rgba(255,255,255,0.02);
     border: 1px solid var(--deity-border);
     border-radius: 12px;
-    padding: 16px 18px;
+    padding: clamp(10px, 1.6vh, 16px) 18px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: border-color 0.5s;
+    flex-shrink: 0;
   }
 
   .blessing-box::before {
@@ -412,14 +442,15 @@
   .btn-main-text {
     position: relative;
     z-index: 1;
-    font-size: 20px;
+    font-size: clamp(17px, 2.5vh, 20px);
     font-weight: 900;
     color: var(--deity-primary);
     text-shadow: 0 0 10px var(--deity-glow), 0 2px 4px rgba(0,0,0,0.5);
     letter-spacing: 4px;
-    display: block;
-    text-align: center;
-    line-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
     transition: all 0.5s;
   }
 
@@ -481,11 +512,100 @@
     100%{ opacity: 1; transform: translateX(0) scale(1); }
   }
 
-  /* 响应式 */
+  /* ===== 手机端（≤480px）：全屏自适应，保持原有行为 ===== */
+  @media (max-width: 480px) {
+    body {
+      height: 100vh;
+      overflow: hidden;
+      justify-content: flex-start;
+    }
+    #app-scroll {
+      width: 100%;
+      height: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+  }
+
   @media (max-width: 400px) {
-    .deity-frame { width: 170px; height: 170px; }
-    .title { font-size: 30px; }
-    .nav-arrow { width: 38px; height: 38px; font-size: 16px; }
+    .deity-frame { width: clamp(130px, 22vh, 170px); height: clamp(130px, 22vh, 170px); }
+    .title { font-size: clamp(22px, 4.5vh, 30px); }
+    .nav-arrow { width: 36px; height: 36px; font-size: 15px; }
+  }
+
+  /* 超矮屏（高度 < 680px，如 iPhone SE / 折叠屏外屏）额外压缩 */
+  @media (max-height: 680px) and (max-width: 480px) {
+    .container { gap: clamp(6px, 1.2vh, 10px); }
+    .blessing-box { min-height: 56px; padding: 8px 16px; }
+    .deity-frame { width: clamp(130px, 22vh, 160px); height: clamp(130px, 22vh, 160px); }
+    .title { font-size: clamp(22px, 4vh, 28px); }
+    #deity-affinity-bar { margin-top: -4px; }
+    .status-bar { display: none; }
+  }
+
+  /* ===== 电脑端（>480px）：手机壳容器，居中展示 ===== */
+  @media (min-width: 481px) {
+    body {
+      height: 100vh;
+      overflow: hidden;
+      justify-content: center;
+      align-items: center;
+      background: #020008;
+    }
+
+    /* 手机外壳容器 */
+    #app-scroll {
+      width: 390px;
+      height: min(820px, 90vh);
+      flex: none;
+      /* 重置手机端的 height:0 */
+      overflow-y: auto;
+      overflow-x: hidden;
+      border-radius: 40px;
+      border: 2px solid rgba(255,255,255,0.1);
+      box-shadow:
+        0 0 0 8px rgba(255,255,255,0.03),
+        0 30px 80px rgba(0,0,0,0.9),
+        0 0 40px var(--deity-glow, rgba(255,215,0,0.15)),
+        inset 0 0 0 1px rgba(255,255,255,0.04);
+      position: relative;
+    }
+
+    /* 顶部刘海装饰 */
+    #app-scroll::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 72px;
+      height: 6px;
+      background: rgba(0,0,0,0.9);
+      border-radius: 3px;
+      z-index: 200;
+      pointer-events: none;
+    }
+
+    /* 调整内部元素宽度填满手机框 */
+    .container,
+    .nav-row,
+    #recommend-banner,
+    #today-wuxing-bar {
+      max-width: 100%;
+    }
+
+    /* 电脑端 nav-row 顶部给刘海留空间 */
+    .nav-row {
+      padding-top: clamp(24px, 3vh, 32px);
+    }
+  }
+
+  /* 超高分辨率大屏：手机壳稍大一点 */
+  @media (min-width: 481px) and (min-height: 900px) {
+    #app-scroll {
+      width: 420px;
+      height: min(860px, 90vh);
+    }
   }
 
   /* ===== 命盘录入页 ===== */
@@ -664,6 +784,7 @@
     z-index: 10;
     margin: 0 16px;
     padding: 0 16px;
+    flex-shrink: 0;
   }
 
   #recommend-banner.visible {
@@ -734,20 +855,22 @@
     bottom: 88px;
     right: 16px;
     z-index: 200;
-    background: rgba(0,0,0,0.7);
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--deity-primary);
     border-radius: 24px;
     color: var(--deity-primary);
     font-size: 12px;
-    padding: 8px 16px;
+    padding: 10px 18px;
     cursor: pointer;
     letter-spacing: 1px;
     font-family: 'Noto Serif SC', serif;
-    box-shadow: 0 0 12px var(--deity-glow);
+    box-shadow: 0 4px 20px var(--deity-glow), 0 2px 8px rgba(0,0,0,0.4);
     transition: all 0.25s;
     -webkit-tap-highlight-color: transparent;
   }
-  #share-btn:hover { transform: scale(1.06); }
+  #share-btn:hover { transform: scale(1.06); box-shadow: 0 6px 28px var(--deity-glow); }
   #share-btn:active { transform: scale(0.94); }
 
   .share-card-logo { font-size: 36px; margin-bottom: 6px; }
@@ -883,6 +1006,7 @@
     padding: 0 16px;
     position: relative;
     z-index: 10;
+    flex-shrink: 0;
   }
 
   .wuxing-tag {
@@ -913,7 +1037,9 @@
     top: 68px;
     right: 16px;
     z-index: 200;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 20px;
     color: rgba(255,255,255,0.45);
@@ -1126,14 +1252,15 @@
   /* ===== B: 按钮波纹Ripple ===== */
   .btn-worship {
     position: relative;
-    width: 190px;
-    height: 60px;
+    width: clamp(160px, 48vw, 190px);
+    height: clamp(52px, 7.5vh, 60px);
     border: none;
     cursor: pointer;
     outline: none;
     background: transparent;
     -webkit-tap-highlight-color: transparent;
     overflow: hidden;
+    flex-shrink: 0;
   }
   .ripple-effect {
     position: absolute;
@@ -1300,6 +1427,519 @@
     transition: opacity 0.15s;
   }
   .btn-cooldown-overlay.active { opacity: 1; }
+
+  /* =====================================================
+     COMBO 连击系统
+  ===================================================== */
+  #combo-display {
+    position: fixed;
+    top: 38%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 100;
+    text-align: center;
+    opacity: 0;
+  }
+  #combo-display.show {
+    animation: combo-pop 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  #combo-display.hide {
+    animation: combo-fade 0.4s ease forwards;
+  }
+  @keyframes combo-pop {
+    0%   { opacity:0; transform:translate(-50%,-50%) scale(0.4); }
+    60%  { opacity:1; transform:translate(-50%,-50%) scale(1.15); }
+    100% { opacity:1; transform:translate(-50%,-50%) scale(1); }
+  }
+  @keyframes combo-fade {
+    0%   { opacity:1; transform:translate(-50%,-50%) scale(1); }
+    100% { opacity:0; transform:translate(-50%,-80%) scale(0.7); }
+  }
+  .combo-x {
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.6);
+    text-shadow: 0 0 8px var(--deity-glow);
+    display: block;
+    margin-bottom: -4px;
+  }
+  .combo-num {
+    font-size: 72px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -2px;
+    background: linear-gradient(160deg, #ffffff 30%, var(--deity-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px var(--deity-glow));
+    display: block;
+  }
+  .combo-label {
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--deity-primary);
+    text-shadow: 0 0 10px var(--deity-glow);
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* =====================================================
+     3D TILT 神像
+  ===================================================== */
+  .deity-frame {
+    perspective: 600px;
+    cursor: pointer;
+  }
+  #deityTiltWrap {
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+
+  /* =====================================================
+     养成系统 · 好感度星级
+  ===================================================== */
+  #deity-affinity-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+    z-index: 20;
+    margin-top: -6px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  #deity-affinity-bar.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .affinity-star {
+    font-size: 11px;
+    transition: all 0.3s ease;
+    filter: grayscale(1) brightness(0.4);
+  }
+  .affinity-star.lit {
+    filter: grayscale(0) brightness(1);
+    text-shadow: 0 0 8px var(--deity-glow);
+  }
+  .affinity-level-label {
+    font-size: 9px;
+    color: var(--deity-primary);
+    letter-spacing: 2px;
+    opacity: 0.7;
+    margin-left: 2px;
+  }
+
+  /* =====================================================
+     成就弹出通知
+  ===================================================== */
+  #achievement-toast {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-120px);
+    z-index: 4000;
+    max-width: 320px;
+    width: calc(100vw - 40px);
+    background: linear-gradient(135deg, #0a0a1a, #15002a);
+    border: 1px solid rgba(255,215,0,0.6);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 0 30px rgba(255,215,0,0.3), 0 8px 32px rgba(0,0,0,0.5);
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #achievement-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .ach-icon { font-size: 28px; flex-shrink: 0; }
+  .ach-text { flex: 1; }
+  .ach-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: rgba(255,215,0,0.7);
+    margin-bottom: 2px;
+  }
+  .ach-name {
+    font-size: 15px;
+    font-weight: 900;
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255,215,0,0.5);
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+  }
+  .ach-desc {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.5px;
+    line-height: 1.5;
+  }
+
+  /* =====================================================
+     稀有事件 · 神明显灵
+  ===================================================== */
+  #divine-reveal {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 70%);
+  }
+  #divine-reveal.active {
+    animation: divine-flash 2.5s ease forwards;
+  }
+  @keyframes divine-flash {
+    0%   { opacity:0; }
+    8%   { opacity:1; }
+    20%  { opacity:0.3; }
+    35%  { opacity:0.8; }
+    55%  { opacity:0.1; }
+    70%  { opacity:0.6; }
+    100% { opacity:0; }
+  }
+  #divine-text {
+    position: fixed;
+    inset: 0;
+    z-index: 5001;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+  }
+  #divine-text.active {
+    animation: divine-text-show 2.5s ease forwards;
+  }
+  @keyframes divine-text-show {
+    0%   { opacity:0; transform:scale(0.5); }
+    15%  { opacity:1; transform:scale(1.05); }
+    80%  { opacity:1; transform:scale(1); }
+    100% { opacity:0; transform:scale(1.1); }
+  }
+  .divine-icon { font-size: 80px; margin-bottom: 12px; filter: drop-shadow(0 0 30px white); }
+  .divine-title {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    color: #FFD700;
+    text-shadow: 0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,255,255,0.5);
+    margin-bottom: 8px;
+  }
+  .divine-sub {
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: rgba(255,255,255,0.8);
+    text-shadow: 0 0 12px rgba(255,255,255,0.5);
+  }
+  .divine-msg {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255,255,255,0.8);
+    margin-top: 16px;
+    max-width: 280px;
+    text-align: center;
+    letter-spacing: 1px;
+    line-height: 1.7;
+  }
+
+  /* =====================================================
+     香火档案 Tab
+  ===================================================== */
+  #archive-btn {
+    position: fixed;
+    bottom: 28px;
+    left: 16px;
+    z-index: 200;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--deity-primary);
+    border-radius: 24px;
+    color: var(--deity-primary);
+    font-size: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    font-family: 'Noto Serif SC', serif;
+    box-shadow: 0 4px 20px var(--deity-glow), 0 2px 8px rgba(0,0,0,0.4);
+    transition: all 0.25s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #archive-btn:hover { transform: scale(1.06); box-shadow: 0 6px 28px var(--deity-glow); }
+  #archive-btn:active { transform: scale(0.94); }
+
+  #archive-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 2500;
+    background: rgba(0,0,0,0);
+    align-items: flex-end;
+    justify-content: center;
+  }
+  #archive-overlay.active {
+    display: flex;
+    animation: overlay-bg-in 0.3s ease forwards;
+  }
+  #archive-overlay.closing {
+    display: flex;
+    animation: overlay-bg-out 0.25s ease forwards;
+  }
+  .archive-panel {
+    background: linear-gradient(160deg, #08001a, #030010);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 480px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px 20px 40px;
+    transform: translateY(100%);
+    transition: none;
+  }
+  #archive-overlay.active .archive-panel {
+    animation: panel-slide-up 0.35s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+  }
+  #archive-overlay.closing .archive-panel {
+    animation: panel-slide-down 0.25s ease forwards;
+  }
+  @keyframes panel-slide-up {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  @keyframes panel-slide-down {
+    from { transform: translateY(0); }
+    to   { transform: translateY(100%); }
+  }
+  .archive-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .archive-title {
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: var(--deity-primary);
+    text-shadow: 0 0 10px var(--deity-glow);
+  }
+  .archive-close {
+    width: 32px; height: 32px;
+    background: rgba(255,255,255,0.06);
+    border: none; border-radius: 50%;
+    color: rgba(255,255,255,0.4);
+    font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .archive-total {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .archive-total span {
+    color: var(--deity-primary);
+    font-weight: 700;
+    font-size: 20px;
+    text-shadow: 0 0 8px var(--deity-glow);
+  }
+  .archive-deity-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .archive-deity-card.highlighted {
+    border-color: rgba(255,215,0,0.4);
+    box-shadow: 0 0 16px rgba(255,215,0,0.1);
+  }
+  .archive-deity-icon { font-size: 28px; flex-shrink: 0; }
+  .archive-deity-info { flex: 1; }
+  .archive-deity-name {
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .archive-deity-title-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+    opacity: 0.7;
+  }
+  .archive-deity-stars {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 6px;
+  }
+  .archive-deity-stars span {
+    font-size: 12px;
+    transition: all 0.3s;
+  }
+  .archive-progress-wrap {
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    height: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+  .archive-progress-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .archive-count {
+    font-size: 22px;
+    font-weight: 900;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .archive-count-label {
+    font-size: 9px;
+    letter-spacing: 1px;
+    opacity: 0.5;
+    text-align: right;
+    margin-top: 2px;
+  }
+  .archive-ach-section {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .archive-ach-title {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: rgba(255,255,255,0.3);
+    margin-bottom: 12px;
+  }
+  .archive-ach-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .archive-ach-badge {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s;
+  }
+  .archive-ach-badge.unlocked {
+    border-color: rgba(255,215,0,0.4);
+    color: #FFD700;
+    background: rgba(255,215,0,0.06);
+    text-shadow: 0 0 6px rgba(255,215,0,0.3);
+  }
+  .archive-streak {
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    letter-spacing: 2px;
+    margin-top: 12px;
+    text-align: center;
+  }
+  .archive-streak b { color: #FF9800; }
+
+  /* =====================================================
+     存档码
+  ===================================================== */
+  .archive-save-section { padding-bottom: 8px; }
+  .archive-save-desc {
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 1px;
+    margin: 6px 0 12px;
+    line-height: 1.6;
+  }
+  .archive-save-btns {
+    display: flex;
+    gap: 10px;
+  }
+  .archive-save-btn {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    padding: 10px 6px;
+    cursor: pointer;
+    font-family: 'Noto Serif SC', serif;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .archive-save-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
+  .archive-code-area {
+    width: 100%;
+    margin-top: 10px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.6);
+    font-size: 11px;
+    font-family: monospace;
+    padding: 10px 12px;
+    resize: none;
+    height: 100px;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+    word-break: break-all;
+  }
+  .archive-code-area:focus { outline: none; border-color: rgba(255,215,0,0.3); }
+  .archive-copy-btn {
+    margin-top: 8px;
+    width: 100%;
+    background: rgba(255,215,0,0.1);
+    border: 1px solid rgba(255,215,0,0.4);
+    border-radius: 10px;
+    color: #FFD700;
+    font-size: 13px;
+    padding: 9px;
+    cursor: pointer;
+    font-family: 'Noto Serif SC', serif;
+    letter-spacing: 2px;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .archive-copy-btn:active { transform: scale(0.95); }
+  .archive-copy-tip {
+    font-size: 11px;
+    text-align: center;
+    margin-top: 6px;
+    letter-spacing: 1px;
+    min-height: 16px;
+    transition: opacity 0.3s;
+  }
 </style>
 </head>
 <body>
@@ -1339,6 +1979,8 @@
 
 <!-- 修改信息按钮 -->
 <button id="edit-profile-btn" onclick="resetProfile()">修改信息</button>
+
+<div id="app-scroll">
 
 <div class="grid-bg" id="gridBg"></div>
 <canvas id="particles"></canvas>
@@ -1398,6 +2040,72 @@
   </div>
 </div>
 
+<!-- Combo 连击显示 -->
+<div id="combo-display">
+  <span class="combo-x">COMBO</span>
+  <span class="combo-num" id="comboNum">2</span>
+  <span class="combo-label" id="comboLabel">连 击</span>
+</div>
+
+<!-- 成就解锁通知 -->
+<div id="achievement-toast">
+  <div class="ach-icon" id="achIcon">🏆</div>
+  <div class="ach-text">
+    <div class="ach-title">◆ 成就解锁 ◆</div>
+    <div class="ach-name" id="achName"></div>
+    <div class="ach-desc" id="achDesc"></div>
+  </div>
+</div>
+
+<!-- 稀有事件 · 神明显灵 -->
+<div id="divine-reveal"></div>
+<div id="divine-text">
+  <div class="divine-icon" id="divineIcon"></div>
+  <div class="divine-title" id="divineTitle"></div>
+  <div class="divine-sub">神 明 显 灵</div>
+  <div class="divine-msg" id="divineMsg"></div>
+</div>
+
+<!-- 香火档案按钮 -->
+<button id="archive-btn" onclick="openArchive()">⛩ 香火档案</button>
+
+<!-- 香火档案面板 -->
+<div id="archive-overlay">
+  <div class="archive-panel">
+    <div class="archive-header">
+      <div class="archive-title">⛩ 香 火 档 案</div>
+      <button class="archive-close" onclick="closeArchive()">✕</button>
+    </div>
+    <div class="archive-total">累计总香火 <span id="archiveTotalCount">0</span> 炷</div>
+    <div id="archive-deity-list"></div>
+    <div class="archive-ach-section">
+      <div class="archive-ach-title">◆ 解锁成就</div>
+      <div class="archive-ach-list" id="archive-ach-list"></div>
+    </div>
+    <div class="archive-streak" id="archiveStreak"></div>
+
+    <!-- 存档码区域 -->
+    <div class="archive-save-section">
+      <div class="archive-ach-title" style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06)">◆ 存档同步</div>
+      <div class="archive-save-desc">导出存档码可在换设备/换浏览器后恢复全部记录</div>
+      <div class="archive-save-btns">
+        <button class="archive-save-btn" onclick="exportSaveCode()">📤 导出存档码</button>
+        <button class="archive-save-btn" onclick="showImportArea()">📥 导入存档码</button>
+      </div>
+      <div id="save-code-box" style="display:none">
+        <textarea id="save-code-text" class="archive-code-area" readonly onclick="this.select()"></textarea>
+        <button class="archive-copy-btn" onclick="copySaveCode()">复制</button>
+        <div id="copy-tip" class="archive-copy-tip"></div>
+      </div>
+      <div id="import-box" style="display:none">
+        <textarea id="import-code-text" class="archive-code-area" placeholder="粘贴存档码到这里…"></textarea>
+        <button class="archive-save-btn" style="width:100%;margin-top:8px" onclick="importSaveCode()">确认导入</button>
+        <div id="import-tip" class="archive-copy-tip"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- 赛博风确认对话框 -->
 <div id="cyber-confirm">
   <div class="cyber-confirm-box">
@@ -1429,17 +2137,29 @@
     <div class="title-en" id="titleEnEl"></div>
   </div>
 
-  <div class="deity-frame">
-    <div class="halo-outer" id="haloOuter"></div>
-    <div class="halo-inner" id="haloInner"></div>
-    <div class="deity-inner" id="deityInner">
-      <div class="deity-svg-wrap" id="deityWrap">
-        <!-- 神像通过JS注入 -->
+  <div class="deity-frame" id="deityFrame">
+    <div id="deityTiltWrap">
+      <div class="halo-outer" id="haloOuter"></div>
+      <div class="halo-inner" id="haloInner"></div>
+      <div class="deity-inner" id="deityInner">
+        <div class="deity-svg-wrap" id="deityWrap">
+          <!-- 神像通过JS注入 -->
+        </div>
       </div>
     </div>
     <div class="count-display" id="countDisplay">
       累计祈福 <span id="countNum">0</span> 次
     </div>
+  </div>
+
+  <!-- 好感度星星移到 deity-frame 外，放在独立行 -->
+  <div id="deity-affinity-bar">
+    <span class="affinity-star" id="star0">★</span>
+    <span class="affinity-star" id="star1">★</span>
+    <span class="affinity-star" id="star2">★</span>
+    <span class="affinity-star" id="star3">★</span>
+    <span class="affinity-star" id="star4">★</span>
+    <span class="affinity-level-label" id="affinityLabel"></span>
   </div>
 
   <div class="status-bar">
@@ -1473,6 +2193,8 @@
 
   <div class="footer-deco" id="footerDeco"></div>
 </div>
+
+</div><!-- /#app-scroll -->
 
 <script>
 // =====================================================
@@ -2168,6 +2890,215 @@ const DEITIES = [
         <ellipse cx="10" cy="25" rx="5" ry="3" fill="rgba(0,229,255,0.12)"/>
       </svg>`
   },
+
+  // ===== 三山国王 =====
+  {
+    id: 'sanshan',
+    icon: '⛰️',
+    name: '三山国王',
+    nameEn: 'THREE MOUNTAINS KING',
+    tag: '平安',
+    subtitle: 'CYBER · MOUNTAIN · KING',
+    title: '赛博三山圣殿',
+    titleEn: 'CYBERPUNK THREE MOUNTAINS',
+    idleText: '按下祈福键，祈三山国王庇佑',
+    btnText: '祈 王',
+    statusOnline: '三山国王在位 · 山河庇佑',
+    statusPraying: '山岳感应中，三山国王接旨...',
+    statusDone: '✓ 三山感应 · 国王已赐福',
+    blessingLabel: '◆ 三山圣旨 ◆',
+    footer: '⬡ 三山永镇 · 家宅平安 ⬡',
+    colors: {
+      primary: '#7CFC00',
+      secondary: '#FFD700',
+      glow: 'rgba(124,252,0,0.5)',
+      shadow: 'rgba(34,139,34,0.3)',
+      border: 'rgba(124,252,0,0.28)',
+      halo: 'conic-gradient(#7CFC00, #FFD700, #228B22, #ADFF2F, #7CFC00)',
+      btnBg: 'linear-gradient(135deg, #0a2a0a, #1a4a1a, #2d6b2d)',
+      btnBorder: 'linear-gradient(135deg, #7CFC00, #FFD700, #ADFF2F, #7CFC00)',
+      bg: '#030f03',
+      flashBg: 'radial-gradient(circle at center, rgba(124,252,0,0.15), transparent 70%)',
+    },
+    floaters: ['⛰️','🌿','🌾','✨','🍃','💚','🌳'],
+    matrixChars: '三山国王山河庇佑平安吉祥福泽万民圣山永镇',
+    blessings: [
+      "⛰️ 三山国王降旨：山河为证，此人今年诸事顺遂，逢难必解",
+      "🌿 圣山感应：三山之力庇体，百邪不侵，出行平安",
+      "🌾 国王赐福：家宅稳如山岳，财运如涓涓细流，绵绵不绝",
+      "✨ 三山圣旨：你的诚心已感动山神，今年逢凶化吉，遇难成祥",
+      "💚 山神赐予：土地丰收之气环绕，事业稳健，步步高升",
+      "🌳 三山国王批示：根基已稳，前路如山路开阔，前途无量",
+      "⛰️ 圣山护体：三山之气加持，今年健康无虞，身心安泰",
+      "🍃 国王开示：稳中有进，山不动而万民安，你的运势如山般稳固",
+      "🌾 三山感应：田园之气入运，今年收获满满，所求皆得",
+      "✨ 赛博山神批：你的心诚如山石，感动三山，特赐贵人运",
+      "⛰️ 国王圣旨：三山永镇，家宅无灾无难，岁岁平安如意",
+      "💚 山河庇佑：今年如山泉常流，财运不断，福气绵绵",
+      "🌿 三山国王御批：消你今年三灾，赐你满年顺气，百事大吉",
+      "🌳 圣山加持：根深则叶茂，你的事业根基稳固，必有大成",
+      "⛰️ 三山降福：山高路远皆通途，今年无论何难，皆可化解",
+      "🌾 国王钦赐：山河之气加护，今年出行平安，家宅安康",
+    ],
+    svgContent: `
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="120" height="120">
+        <!-- 袍服主体 -->
+        <rect x="18" y="32" width="28" height="26" fill="#1a3d1a" rx="2"/>
+        <rect x="16" y="35" width="4" height="20" fill="#143214"/>
+        <rect x="44" y="35" width="4" height="20" fill="#143214"/>
+        <!-- 袍服金边 -->
+        <rect x="18" y="32" width="28" height="3" fill="#7CFC00"/>
+        <rect x="18" y="52" width="28" height="3" fill="#7CFC00"/>
+        <!-- 腰带 -->
+        <rect x="18" y="42" width="28" height="4" fill="#FFD700"/>
+        <rect x="29" y="41" width="6" height="6" fill="#DAA520" rx="1"/>
+        <!-- 铠甲护胸 -->
+        <rect x="24" y="33" width="16" height="10" fill="#2d6b2d" rx="1"/>
+        <rect x="26" y="35" width="12" height="2" fill="#7CFC00"/>
+        <rect x="26" y="38" width="12" height="2" fill="#7CFC00"/>
+        <!-- 脸部 -->
+        <rect x="22" y="16" width="20" height="18" fill="#C68642"/>
+        <rect x="20" y="18" width="2" height="14" fill="#C68642"/>
+        <rect x="42" y="18" width="2" height="14" fill="#C68642"/>
+        <!-- 眼睛（威严） -->
+        <rect x="25" y="21" width="5" height="4" fill="#8B0000" rx="1"/>
+        <rect x="34" y="21" width="5" height="4" fill="#8B0000" rx="1"/>
+        <rect x="26" y="22" width="3" height="2" fill="#CC0000"/>
+        <rect x="35" y="22" width="3" height="2" fill="#CC0000"/>
+        <!-- 鼻子 -->
+        <rect x="30" y="26" width="4" height="3" fill="#A0522D"/>
+        <!-- 髭须 -->
+        <rect x="23" y="30" width="6" height="2" fill="#2d1a00" rx="1"/>
+        <rect x="35" y="30" width="6" height="2" fill="#2d1a00" rx="1"/>
+        <rect x="27" y="28" width="10" height="2" fill="#4a2800" rx="1"/>
+        <!-- 头冠 -->
+        <rect x="21" y="8" width="22" height="10" fill="#1a3d1a" rx="1"/>
+        <rect x="23" y="6" width="18" height="4" fill="#2d6b2d"/>
+        <!-- 冠顶三峰（三山象征） -->
+        <polygon points="28,2 32,8 24,8" fill="#7CFC00"/>
+        <polygon points="32,0 36,8 28,8" fill="#ADFF2F"/>
+        <polygon points="36,2 40,8 32,8" fill="#7CFC00"/>
+        <!-- 冠金边 -->
+        <rect x="21" y="8" width="22" height="2" fill="#FFD700"/>
+        <!-- 金玉装饰 -->
+        <circle cx="32" cy="5" r="2" fill="#FFD700"/>
+        <!-- 令旗（手持） -->
+        <rect x="8" y="24" width="2" height="20" fill="#8B4513"/>
+        <polygon points="10,24 18,26 10,32" fill="#7CFC00"/>
+        <!-- 山纹装饰 -->
+        <polygon points="50,50 54,44 58,50" fill="rgba(124,252,0,0.2)"/>
+        <polygon points="6,48 10,42 14,48" fill="rgba(124,252,0,0.15)"/>
+      </svg>`
+  },
+
+  // ===== 妈祖 =====
+  {
+    id: 'mazu',
+    icon: '🌊',
+    name: '妈祖',
+    nameEn: 'GODDESS MAZU',
+    tag: '护航',
+    subtitle: 'CYBER · SEA · GODDESS',
+    title: '赛博妈祖宫',
+    titleEn: 'CYBERPUNK MAZU TEMPLE',
+    idleText: '按下祈福键，求妈祖庇护',
+    btnText: '祈 护',
+    statusOnline: '妈祖显灵 · 海天庇佑',
+    statusPraying: '海浪传音，妈祖娘娘感应中...',
+    statusDone: '✓ 海天感应 · 妈祖已护体',
+    blessingLabel: '◆ 妈祖神谕 ◆',
+    footer: '⬡ 海天护佑 · 平安顺航 ⬡',
+    colors: {
+      primary: '#00BFFF',
+      secondary: '#FF69B4',
+      glow: 'rgba(0,191,255,0.55)',
+      shadow: 'rgba(0,105,148,0.3)',
+      border: 'rgba(0,191,255,0.28)',
+      halo: 'conic-gradient(#00BFFF, #FF69B4, #87CEEB, #FFFFFF, #00BFFF)',
+      btnBg: 'linear-gradient(135deg, #001a2e, #003366, #005580)',
+      btnBorder: 'linear-gradient(135deg, #00BFFF, #FF69B4, #87CEEB, #00BFFF)',
+      bg: '#00030f',
+      flashBg: 'radial-gradient(circle at center, rgba(0,191,255,0.18), transparent 70%)',
+    },
+    floaters: ['🌊','⚓','🌸','✨','🕊️','💙','🌺'],
+    matrixChars: '妈祖护航海天庇佑平安顺风渡海祈福娘娘显灵',
+    blessings: [
+      "🌊 妈祖娘娘降旨：海天护体，此行一路顺风，平安归来",
+      "⚓ 妈祖感应：你的诚心如灯塔，娘娘已为你照亮前路",
+      "🌸 海天庇佑：妈祖赐你顺风顺水，今年万事无阻",
+      "✨ 娘娘神谕：心善则海平，你的善念感动妈祖，特赐平安符",
+      "💙 妈祖开示：无论前路几多风浪，皆有娘娘护你渡过",
+      "🕊️ 海上圣母批示：你今年如顺风扬帆，一路高歌，万里无阻",
+      "🌊 妈祖显灵：护你出行平安，家人无忧，海阔天空任翱翔",
+      "⚓ 娘娘赐福：根如锚，稳住人生，今年风浪再大也奈何不了你",
+      "🌺 妈祖神谕：家和则万事兴，你的家宅今年风平浪静，安康富足",
+      "✨ 海天感应：妈祖娘娘亲为护航，今年无论走陆走水，皆保平安",
+      "🌊 娘娘御批：消你今年水厄，赐你平安顺遂，诸事大吉",
+      "💙 妈祖开眼：你心诚，海天皆知，特赐今年贵人运，遇难必有人助",
+      "⚓ 海上圣母：锚定福气，守住平安，今年无论多难，必能化险为夷",
+      "🌸 妈祖感应：如春风化雨，今年你所求皆得，所盼皆来",
+      "🌊 娘娘圣旨：护你千里顺风，家人平安，事业顺航，财运滚滚",
+      "✨ 妈祖钦赐：今年如乘神舟，一帆风顺，直达彼岸，心想事成",
+    ],
+    svgContent: `
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" width="120" height="120">
+        <!-- 裙摆 -->
+        <rect x="16" y="34" width="32" height="24" fill="#003366" rx="2"/>
+        <rect x="14" y="38" width="4" height="18" fill="#002244"/>
+        <rect x="46" y="38" width="4" height="18" fill="#002244"/>
+        <!-- 裙摆波纹 -->
+        <rect x="16" y="40" width="32" height="2" fill="rgba(0,191,255,0.4)"/>
+        <rect x="16" y="46" width="32" height="2" fill="rgba(0,191,255,0.3)"/>
+        <rect x="16" y="52" width="32" height="2" fill="rgba(0,191,255,0.4)"/>
+        <!-- 上衣 -->
+        <rect x="20" y="26" width="24" height="10" fill="#005580" rx="1"/>
+        <!-- 领口金边 -->
+        <rect x="20" y="26" width="24" height="2" fill="#00BFFF"/>
+        <!-- 红色腰带 -->
+        <rect x="18" y="34" width="28" height="4" fill="#CC0055"/>
+        <rect x="29" y="33" width="6" height="6" fill="#FF1493" rx="1"/>
+        <!-- 脸部 -->
+        <rect x="22" y="14" width="20" height="14" fill="#FDBCB4" rx="3"/>
+        <rect x="20" y="16" width="2" height="10" fill="#FDBCB4"/>
+        <rect x="42" y="16" width="2" height="10" fill="#FDBCB4"/>
+        <!-- 眼睛（慈悲） -->
+        <ellipse cx="27" cy="19" rx="3" ry="2.5" fill="#1a1a2e"/>
+        <ellipse cx="37" cy="19" rx="3" ry="2.5" fill="#1a1a2e"/>
+        <circle cx="27" cy="19" r="1.2" fill="#4a90d9"/>
+        <circle cx="37" cy="19" r="1.2" fill="#4a90d9"/>
+        <circle cx="27.5" cy="18.5" r="0.5" fill="white"/>
+        <circle cx="37.5" cy="18.5" r="0.5" fill="white"/>
+        <!-- 眉毛（弯弯） -->
+        <rect x="24" y="16" width="6" height="1" fill="#6B3A2A" rx="0.5"/>
+        <rect x="34" y="16" width="6" height="1" fill="#6B3A2A" rx="0.5"/>
+        <!-- 嘴唇 -->
+        <rect x="29" y="24" width="6" height="2" fill="#E8526A" rx="1"/>
+        <!-- 凤冠 -->
+        <rect x="20" y="6" width="24" height="10" fill="#001a44" rx="1"/>
+        <rect x="22" y="4" width="20" height="4" fill="#003366"/>
+        <!-- 凤冠装饰珠 -->
+        <circle cx="24" cy="6" r="1.5" fill="#FF69B4"/>
+        <circle cx="28" cy="4" r="1.5" fill="#00BFFF"/>
+        <circle cx="32" cy="3" r="2" fill="#FFD700"/>
+        <circle cx="36" cy="4" r="1.5" fill="#00BFFF"/>
+        <circle cx="40" cy="6" r="1.5" fill="#FF69B4"/>
+        <!-- 凤冠金边 -->
+        <rect x="20" y="6" width="24" height="1.5" fill="#00BFFF"/>
+        <rect x="20" y="14" width="24" height="1.5" fill="#00BFFF"/>
+        <!-- 发髻两侧垂饰 -->
+        <rect x="16" y="10" width="2" height="8" fill="#00BFFF" rx="1"/>
+        <rect x="46" y="10" width="2" height="8" fill="#00BFFF" rx="1"/>
+        <circle cx="17" cy="18" r="2" fill="#FF69B4"/>
+        <circle cx="47" cy="18" r="2" fill="#FF69B4"/>
+        <!-- 如意（手持） -->
+        <rect x="7" y="28" width="2" height="14" fill="#8B4513"/>
+        <ellipse cx="8" cy="28" rx="3" ry="2" fill="#00BFFF"/>
+        <ellipse cx="8" cy="30" rx="2" ry="1.5" fill="#87CEEB"/>
+        <!-- 海浪纹背景 -->
+        <path d="M4 55 Q10 50 16 55 Q22 60 28 55 Q34 50 40 55 Q46 60 52 55 Q58 50 64 55" stroke="rgba(0,191,255,0.25)" stroke-width="2" fill="none"/>
+        <path d="M4 59 Q10 54 16 59 Q22 64 28 59 Q34 54 40 59 Q46 64 52 59" stroke="rgba(0,191,255,0.15)" stroke-width="1.5" fill="none"/>
+      </svg>`
+  },
 ];
 
 // =====================================================
@@ -2253,6 +3184,8 @@ function playSound(deity) {
     taibai:   [466, 587, 698, 932],
     ouhuang:  [523, 698, 880, 1047],
     tiangong: [396, 528, 660, 792],
+    sanshan:  [330, 440, 550, 660],  // 大气厚重，五声音阶
+    mazu:     [370, 494, 622, 831],  // 柔美流动，如海浪
   };
 
   // 低频冲击
@@ -2471,20 +3404,25 @@ function nextDeity() {
 }
 
 // =====================================================
-// 触摸滑动手势
+// 触摸滑动手势（绑定到滚动容器）
 // =====================================================
 let touchStartX = 0;
 let touchStartY = 0;
+let touchScrollY = 0;
 
-document.addEventListener('touchstart', e => {
+const appScroll = document.getElementById('app-scroll');
+(appScroll || document).addEventListener('touchstart', e => {
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
+  touchScrollY = appScroll ? appScroll.scrollTop : 0;
 }, { passive: true });
 
-document.addEventListener('touchend', e => {
+(appScroll || document).addEventListener('touchend', e => {
   const dx = e.changedTouches[0].clientX - touchStartX;
   const dy = e.changedTouches[0].clientY - touchStartY;
-  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+  const scrollDelta = appScroll ? Math.abs(appScroll.scrollTop - touchScrollY) : 0;
+  // 只有横向滑动且没有明显垂直滚动时才切换神明
+  if (scrollDelta < 10 && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
     if (dx < 0) nextDeity();
     else prevDeity();
   }
@@ -3214,6 +4152,558 @@ document.getElementById('install-btn')?.addEventListener('click', async () => {
 document.getElementById('install-close')?.addEventListener('click', () => {
   document.getElementById('install-bar').style.display = 'none';
 });
+
+// =====================================================
+// ★ 养成系统核心数据
+// =====================================================
+const AFFINITY_THRESHOLDS = [1, 10, 30, 60, 100]; // 各星等级所需香火
+const AFFINITY_TITLES = {
+  caishen:  ['初来乍到','香客常客','财神信徒','财运守护者','财神挚友'],
+  yuelao:   ['初来乍到','姻缘探寻','月老信徒','红线守护者','月老红娘'],
+  wenchang: ['初来乍到','勤学苦读','文昌信徒','智慧守护者','文昌门生'],
+  yaowang:  ['初来乍到','强身健体','药王信徒','健康守护者','药王传人'],
+  taibai:   ['初来乍到','职场新人','太白信徒','事业守护者','天庭贵宾'],
+  ouhuang:  ['初来乍到','欧气初现','欧皇信徒','欧皇护卫者','欧皇化身'],
+  tiangong: ['初来乍到','虔诚叩拜','天公信徒','天命守护者','天公钦点'],
+  sanshan:  ['初来乍到','山脚香客','三山信民','山神守护者','国王钦点'],
+  mazu:     ['初来乍到','渡口香客','妈祖信徒','海天守护者','妈祖亲传'],
+};
+
+function getAffinityData() {
+  try { return JSON.parse(localStorage.getItem('cyber_affinity') || '{}'); }
+  catch { return {}; }
+}
+function saveAffinityData(data) {
+  localStorage.setItem('cyber_affinity', JSON.stringify(data));
+}
+function getDeityAffinity(id) {
+  const d = getAffinityData();
+  return d[id] || { count: 0, level: 0 };
+}
+function addDeityAffinity(id) {
+  const data = getAffinityData();
+  if (!data[id]) data[id] = { count: 0, level: 0 };
+  data[id].count++;
+  // 升级检测
+  const prevLevel = data[id].level;
+  for (let i = AFFINITY_THRESHOLDS.length - 1; i >= 0; i--) {
+    if (data[id].count >= AFFINITY_THRESHOLDS[i]) {
+      data[id].level = i + 1;
+      break;
+    }
+    if (i === 0 && data[id].count < AFFINITY_THRESHOLDS[0]) {
+      data[id].level = 0;
+    }
+  }
+  const leveled = data[id].level > prevLevel;
+  saveAffinityData(data);
+  return { count: data[id].count, level: data[id].level, leveled, prevLevel };
+}
+
+function updateAffinityDisplay(deityId) {
+  const bar = document.getElementById('deity-affinity-bar');
+  // 先淡出
+  if (bar) { bar.classList.remove('visible'); }
+  const { count, level } = getDeityAffinity(deityId);
+  setTimeout(() => {
+    for (let i = 0; i < 5; i++) {
+      const star = document.getElementById('star' + i);
+      if (star) star.classList.toggle('lit', i < level);
+    }
+    const label = document.getElementById('affinityLabel');
+    if (label) {
+      const titles = AFFINITY_TITLES[deityId] || [];
+      label.textContent = level > 0 ? titles[level - 1] || '' : '';
+    }
+    // 淡入
+    if (bar) bar.classList.add('visible');
+  }, 120);
+}
+
+// =====================================================
+// ★ 签到 / 连续天数
+// =====================================================
+function getStreak() {
+  try { return JSON.parse(localStorage.getItem('cyber_streak') || '{"days":0,"last":""}'); }
+  catch { return { days: 0, last: '' }; }
+}
+function updateStreak() {
+  const today = getTodayKey();
+  const s = getStreak();
+  if (s.last === today) return s.days; // 今天已签
+  const yesterday = (() => {
+    const d = new Date(); d.setDate(d.getDate() - 1);
+    return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+  })();
+  const newDays = s.last === yesterday ? s.days + 1 : 1;
+  localStorage.setItem('cyber_streak', JSON.stringify({ days: newDays, last: today }));
+  // 签到视觉反馈
+  if (newDays >= 2) {
+    setTimeout(() => showAchievementToast({
+      icon: '📅',
+      name: `连续祈福第 ${newDays} 天`,
+      desc: newDays >= 7 ? '七日虔诚，神明感动！' : newDays >= 3 ? '坚持就是信念！' : '再接再厉，神明欣慰'
+    }), 1500);
+  }
+  return newDays;
+}
+
+// =====================================================
+// ★ 成就系统
+// =====================================================
+const ACHIEVEMENTS = [
+  { id: 'first',      icon: '🌟', name: '初心香客',   desc: '第一次祈福',         check: (total) => total >= 1 },
+  { id: 'ten',        icon: '🔥', name: '虔诚信徒',   desc: '累计祈福10次',       check: (total) => total >= 10 },
+  { id: 'fifty',      icon: '💫', name: '香火兴旺',   desc: '累计祈福50次',       check: (total) => total >= 50 },
+  { id: 'hundred',    icon: '🏆', name: '百拜虔诚',   desc: '累计祈福100次',      check: (total) => total >= 100 },
+  { id: 'fivehun',   icon: '👑', name: '神殿常驻',   desc: '累计祈福500次',      check: (total) => total >= 500 },
+  { id: 'alldeity',   icon: '⚡', name: '众神归一',   desc: '拜遍所有神明',        check: (total, counts) => Object.keys(counts).length >= DEITIES.length },
+  { id: 'streak3',    icon: '📅', name: '三日连拜',   desc: '连续祈福3天',         check: (total, counts, streak) => streak >= 3 },
+  { id: 'streak7',    icon: '🌙', name: '七日虔诚',   desc: '连续祈福7天',         check: (total, counts, streak) => streak >= 7 },
+  { id: 'maxlevel',   icon: '🌈', name: '天命宠儿',   desc: '任意神明达到5星',     check: (total, counts, streak, aff) => Object.values(aff).some(a => a.level >= 5) },
+];
+
+function getUnlockedAch() {
+  try { return JSON.parse(localStorage.getItem('cyber_achievements') || '[]'); }
+  catch { return []; }
+}
+function checkAndUnlockAch(onUnlock) {
+  const unlocked = getUnlockedAch();
+  const total = DEITIES.reduce((s, d) => s + getCount(d.id), 0);
+  const counts = Object.fromEntries(DEITIES.map(d => [d.id, getCount(d.id)]).filter(([,v]) => v > 0));
+  const streak = getStreak().days;
+  const aff = getAffinityData();
+  const newlyUnlocked = [];
+  ACHIEVEMENTS.forEach(ach => {
+    if (!unlocked.includes(ach.id) && ach.check(total, counts, streak, aff)) {
+      unlocked.push(ach.id);
+      newlyUnlocked.push(ach);
+    }
+  });
+  if (newlyUnlocked.length > 0) {
+    localStorage.setItem('cyber_achievements', JSON.stringify(unlocked));
+    newlyUnlocked.forEach((ach, i) => setTimeout(() => onUnlock(ach), i * 2200));
+  }
+}
+
+let achToastTimer = null;
+function showAchievementToast(ach) {
+  const toast = document.getElementById('achievement-toast');
+  document.getElementById('achIcon').textContent = ach.icon;
+  document.getElementById('achName').textContent = ach.name;
+  document.getElementById('achDesc').textContent = ach.desc;
+  clearTimeout(achToastTimer);
+  toast.classList.remove('show');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  achToastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+  // 震动反馈
+  if (navigator.vibrate) navigator.vibrate([50, 30, 80]);
+}
+
+// =====================================================
+// ★ COMBO 连击系统
+// =====================================================
+let comboCount = 0;
+let comboTimer = null;
+const COMBO_WINDOW = 1800; // ms内算连击
+
+function triggerCombo() {
+  comboCount++;
+  clearTimeout(comboTimer);
+
+  if (comboCount >= 2) {
+    const display = document.getElementById('combo-display');
+    const numEl = document.getElementById('comboNum');
+    const labelEl = document.getElementById('comboLabel');
+    numEl.textContent = comboCount;
+
+    // 不同档位标语
+    if (comboCount >= 20)      { labelEl.textContent = '神 明 震 怒'; display.style.color='#FF2D55'; }
+    else if (comboCount >= 10) { labelEl.textContent = 'MAX  COMBO'; display.style.color='#FFD700'; }
+    else if (comboCount >= 5)  { labelEl.textContent = '香 火 鼎 盛'; display.style.color='#E040FB'; }
+    else                       { labelEl.textContent = '连  击'; display.style.color=''; }
+
+    display.classList.remove('show', 'hide');
+    void display.offsetWidth;
+    display.classList.add('show');
+  }
+
+  comboTimer = setTimeout(() => {
+    if (comboCount >= 2) {
+      const display = document.getElementById('combo-display');
+      display.classList.remove('show');
+      display.classList.add('hide');
+    }
+    comboCount = 0;
+  }, COMBO_WINDOW);
+
+  // combo升调音效
+  if (comboCount >= 3) playComboSound(comboCount);
+}
+
+function playComboSound(count) {
+  try {
+    const ctx = getACtx();
+    const now = ctx.currentTime;
+    const baseFreq = Math.min(200 + count * 40, 1200);
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(baseFreq, now);
+    osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, now + 0.15);
+    g.gain.setValueAtTime(0.15, now);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(now); osc.stop(now + 0.25);
+  } catch(e) {}
+}
+
+// =====================================================
+// ★ 神像 3D Tilt
+// =====================================================
+function initTilt() {
+  const frame = document.getElementById('deityFrame');
+  const wrap = document.getElementById('deityTiltWrap');
+  if (!frame || !wrap) return;
+
+  function applyTilt(x, y) {
+    const rect = frame.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (x - cx) / (rect.width / 2);   // -1 ~ 1
+    const dy = (y - cy) / (rect.height / 2);  // -1 ~ 1
+    const rx = -dy * 18; // pitch
+    const ry =  dx * 18; // yaw
+    wrap.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+  }
+
+  function resetTilt() {
+    wrap.style.transition = 'transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94)';
+    wrap.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    setTimeout(() => { wrap.style.transition = 'transform 0.1s ease-out'; }, 500);
+  }
+
+  // 鼠标
+  frame.addEventListener('mousemove', e => applyTilt(e.clientX, e.clientY));
+  frame.addEventListener('mouseleave', resetTilt);
+
+  // 触摸
+  frame.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    applyTilt(t.clientX, t.clientY);
+  }, { passive: true });
+  frame.addEventListener('touchend', resetTilt);
+
+  // 陀螺仪（手机倾斜）
+  window.addEventListener('deviceorientation', e => {
+    if (e.beta == null) return;
+    const rx = Math.max(-18, Math.min(18, (e.beta - 45) * 0.4));
+    const ry = Math.max(-18, Math.min(18, e.gamma * 0.4));
+    wrap.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+  });
+}
+
+// =====================================================
+// ★ 稀有事件 · 神明显灵（每100次触发）
+// =====================================================
+const DIVINE_MSGS = {
+  caishen:  ['财神降临！今日大吉大利，横财必至！', '赛博财神亲自显灵，此人财运冲顶，无可阻挡！'],
+  yuelao:   ['月老现身！你的红线已亲手绑定，缘分天注定！', '月老显灵，此人姻缘大旺，真爱触手可及！'],
+  wenchang: ['文昌显灵！智慧之光已降临，学业无往不利！', '文昌帝君现身加持，此人才华横溢，金榜题名！'],
+  yaowang:  ['药王降世！神药已入体，百毒不侵，健康永驻！', '药王亲临，此人生命力大幅提升，百病全消！'],
+  taibai:   ['太白金星亲降！天庭已批复，升职加薪，马到成功！', '太白显灵，天庭诏书已下，此人前途无量！'],
+  ouhuang:  ['欧皇娘娘降临！天选之人！今日运气爆棚无上限！', '欧皇现身！宇宙欧气全部加持于你，逢赌必赢！'],
+  tiangong: ['天公显灵！玉皇大帝亲自降福，万事顺遂！', '天庭圣旨降下！此人今年厄运全消，鸿运当头！'],
+};
+
+function triggerDivineReveal(deityId) {
+  const d = DEITIES.find(x => x.id === deityId);
+  if (!d) return;
+  const msgs = DIVINE_MSGS[deityId] || ['神明显灵！大吉大利！'];
+  const msg = msgs[Math.floor(Math.random() * msgs.length)];
+
+  document.getElementById('divineIcon').textContent = d.icon;
+  document.getElementById('divineTitle').textContent = '— ' + d.name + ' —';
+  document.getElementById('divineMsg').textContent = msg;
+
+  const revealEl = document.getElementById('divine-reveal');
+  const textEl = document.getElementById('divine-text');
+  revealEl.style.background = `radial-gradient(circle at center, ${d.colors.primary}cc 0%, rgba(255,255,255,0) 70%)`;
+
+  revealEl.classList.remove('active');
+  textEl.classList.remove('active');
+  void revealEl.offsetWidth;
+  revealEl.classList.add('active');
+  textEl.classList.add('active');
+
+  // 震动
+  if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+  // 大量粒子爆炸
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      spawnBurst(innerWidth / 2, innerHeight / 2, d.colors.primary);
+      spawnBurst(innerWidth / 2, innerHeight / 2, '#FFFFFF');
+    }, i * 300);
+  }
+  setTimeout(() => {
+    revealEl.classList.remove('active');
+    textEl.classList.remove('active');
+  }, 2600);
+}
+
+// =====================================================
+// ★ 香火档案面板
+// =====================================================
+function openArchive() {
+  const overlay = document.getElementById('archive-overlay');
+  renderArchive();
+  overlay.classList.remove('closing');
+  overlay.classList.add('active');
+}
+function closeArchive() {
+  const overlay = document.getElementById('archive-overlay');
+  overlay.classList.add('closing');
+  setTimeout(() => overlay.classList.remove('active', 'closing'), 250);
+}
+document.getElementById('archive-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeArchive();
+});
+
+function renderArchive() {
+  const aff = getAffinityData();
+  const unlocked = getUnlockedAch();
+  const streak = getStreak();
+
+  // 总计
+  const total = DEITIES.reduce((s, d) => s + getCount(d.id), 0);
+  document.getElementById('archiveTotalCount').textContent = total;
+
+  // 神明列表
+  const listEl = document.getElementById('archive-deity-list');
+  listEl.innerHTML = '';
+  const sortedDeities = [...DEITIES].sort((a, b) => getCount(b.id) - getCount(a.id));
+  sortedDeities.forEach(d => {
+    const cnt = getCount(d.id);
+    const affData = aff[d.id] || { count: 0, level: 0 };
+    const level = affData.level;
+    const nextThresh = level < 5 ? AFFINITY_THRESHOLDS[level] : AFFINITY_THRESHOLDS[4];
+    const prevThresh = level > 0 ? AFFINITY_THRESHOLDS[level - 1] : 0;
+    const progress = level >= 5 ? 100 : Math.min(100, ((cnt - prevThresh) / (nextThresh - prevThresh)) * 100);
+    const titles = AFFINITY_TITLES[d.id] || [];
+    const titleLabel = level > 0 ? titles[level - 1] : '尚未结缘';
+    const color = d.colors.primary;
+
+    const card = document.createElement('div');
+    card.className = 'archive-deity-card' + (d.id === DEITIES[currentDeityIndex].id ? ' highlighted' : '');
+    card.style.borderColor = cnt > 0 ? `${color}40` : '';
+    card.innerHTML = `
+      <div class="archive-deity-icon">${d.icon}</div>
+      <div class="archive-deity-info">
+        <div class="archive-deity-name" style="color:${color};text-shadow:0 0 8px ${d.colors.glow}">${d.name}</div>
+        <div class="archive-deity-title-label" style="color:${color}">${titleLabel}</div>
+        <div class="archive-deity-stars">
+          ${[0,1,2,3,4].map(i => `<span style="color:${i < level ? color : 'rgba(255,255,255,0.15)'}; text-shadow:${i < level ? '0 0 6px ' + color : 'none'}">★</span>`).join('')}
+        </div>
+        <div class="archive-progress-wrap">
+          <div class="archive-progress-bar" style="width:${progress}%;background:${color};box-shadow:0 0 6px ${d.colors.glow}"></div>
+        </div>
+      </div>
+      <div>
+        <div class="archive-count" style="color:${color};text-shadow:0 0 8px ${d.colors.glow}">${cnt}</div>
+        <div class="archive-count-label" style="color:${color}">香 炷</div>
+      </div>`;
+    listEl.appendChild(card);
+  });
+
+  // 成就
+  const achListEl = document.getElementById('archive-ach-list');
+  achListEl.innerHTML = '';
+  ACHIEVEMENTS.forEach(ach => {
+    const isUnlocked = unlocked.includes(ach.id);
+    const badge = document.createElement('div');
+    badge.className = 'archive-ach-badge' + (isUnlocked ? ' unlocked' : '');
+    badge.innerHTML = `<span>${isUnlocked ? ach.icon : '🔒'}</span><span>${ach.name}</span>`;
+    badge.title = ach.desc;
+    achListEl.appendChild(badge);
+  });
+
+  // 连续天数
+  const streakEl = document.getElementById('archiveStreak');
+  streakEl.innerHTML = streak.days > 0
+    ? `连续祈福 <b>${streak.days}</b> 天 · 功德无量`
+    : '今日尚未祈福';
+}
+
+// =====================================================
+// ★ 将养成逻辑接入 worship() 函数
+// =====================================================
+// 通过重写 addCount 来注入养成逻辑（worship内部调用addCount，动态查找）
+window._originalAddCount = addCount;
+window.addCount = function(id) {
+  const n = window._originalAddCount(id);
+
+  // 1. 养成：香火值 + 好感度
+  const result = addDeityAffinity(id);
+  updateAffinityDisplay(id);
+
+  // 2. 签到
+  updateStreak();
+
+  // 3. Combo
+  triggerCombo();
+
+  // 4. 震动
+  if (navigator.vibrate) navigator.vibrate(15);
+
+  // 5. 升级提示
+  if (result.leveled) {
+    const d = DEITIES.find(x => x.id === id);
+    const titles = AFFINITY_TITLES[id] || [];
+    setTimeout(() => showAchievementToast({
+      icon: '⭐',
+      name: `好感度升至 ${result.level} 星！`,
+      desc: `${d ? d.name : ''} · ${titles[result.level - 1] || ''}`
+    }), 800);
+  }
+
+  // 6. 稀有事件：每100次
+  if (n % 100 === 0) {
+    setTimeout(() => triggerDivineReveal(id), 600);
+  }
+
+  // 7. 成就检测
+  setTimeout(() => checkAndUnlockAch(showAchievementToast), 400);
+
+  return n;
+};
+
+// =====================================================
+// ★ 切换神明时刷新好感度星星
+// =====================================================
+const _originalSwitchDeity = switchDeity;
+switchDeity = function(index, direction, animate) {
+  _originalSwitchDeity(index, direction, animate);
+  setTimeout(() => updateAffinityDisplay(DEITIES[index]?.id), 50);
+};
+
+// =====================================================
+// ★ 存档码导出 / 导入
+// =====================================================
+const SAVE_KEYS = [
+  'cyber_affinity',
+  'cyber_streak',
+  'cyber_achievements',
+  // 各神明计数（格式：cyber_count_<id>）
+  ...(() => { try { return Object.keys(localStorage).filter(k => k.startsWith('cyber_count_')); } catch { return []; } })()
+];
+
+function getAllSaveKeys() {
+  const fixed = ['cyber_affinity', 'cyber_streak', 'cyber_achievements'];
+  const counts = Object.keys(localStorage).filter(k => k.startsWith('cyber_count_'));
+  return [...new Set([...fixed, ...counts])];
+}
+
+function exportSaveCode() {
+  const data = {};
+  getAllSaveKeys().forEach(k => {
+    const v = localStorage.getItem(k);
+    if (v !== null) data[k] = v;
+  });
+  const json = JSON.stringify(data);
+  // btoa不支持中文，用自定义编码
+  const code = btoa(unescape(encodeURIComponent(json)));
+
+  const box = document.getElementById('save-code-box');
+  const txt = document.getElementById('save-code-text');
+  const importBox = document.getElementById('import-box');
+  importBox.style.display = 'none';
+  txt.value = code;
+  box.style.display = 'block';
+  txt.select();
+  document.getElementById('copy-tip').textContent = '';
+}
+
+function copySaveCode() {
+  const txt = document.getElementById('save-code-text');
+  txt.select();
+  const tip = document.getElementById('copy-tip');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(txt.value).then(() => {
+      tip.style.color = '#4CAF50';
+      tip.textContent = '✓ 已复制！粘贴到新设备即可恢复';
+      setTimeout(() => tip.textContent = '', 3000);
+    }).catch(() => fallbackCopy(txt, tip));
+  } else {
+    fallbackCopy(txt, tip);
+  }
+}
+
+function fallbackCopy(txt, tip) {
+  try {
+    document.execCommand('copy');
+    tip.style.color = '#4CAF50';
+    tip.textContent = '✓ 已复制！';
+    setTimeout(() => tip.textContent = '', 3000);
+  } catch {
+    tip.style.color = '#FF5252';
+    tip.textContent = '请手动长按全选复制';
+  }
+}
+
+function showImportArea() {
+  const box = document.getElementById('import-box');
+  const saveBox = document.getElementById('save-code-box');
+  saveBox.style.display = 'none';
+  document.getElementById('import-code-text').value = '';
+  document.getElementById('import-tip').textContent = '';
+  box.style.display = 'block';
+}
+
+function importSaveCode() {
+  const code = document.getElementById('import-code-text').value.trim();
+  const tip = document.getElementById('import-tip');
+  if (!code) {
+    tip.style.color = '#FF5252';
+    tip.textContent = '请先粘贴存档码';
+    return;
+  }
+  try {
+    const json = decodeURIComponent(escape(atob(code)));
+    const data = JSON.parse(json);
+    // 验证格式
+    if (typeof data !== 'object') throw new Error('格式错误');
+    // 写入
+    Object.entries(data).forEach(([k, v]) => {
+      if (k.startsWith('cyber_')) localStorage.setItem(k, v);
+    });
+    tip.style.color = '#4CAF50';
+    tip.textContent = '✓ 存档恢复成功！刷新页面生效';
+    setTimeout(() => {
+      document.getElementById('import-box').style.display = 'none';
+      closeArchive();
+      // 刷新显示
+      updateAffinityDisplay(DEITIES[currentDeityIndex]?.id);
+      renderArchive();
+      // 刷新计数
+      const d = DEITIES[currentDeityIndex];
+      if (d) document.getElementById('countNum').textContent = getCount(d.id);
+    }, 1200);
+  } catch(e) {
+    tip.style.color = '#FF5252';
+    tip.textContent = '存档码无效，请检查是否完整复制';
+  }
+}
+
+// =====================================================
+// ★ 启动新系统
+// =====================================================
+initTilt();
+// 初始化好感度显示
+updateAffinityDisplay(DEITIES[currentDeityIndex]?.id);
+// 初始化连续天数（如果今天已有祈福记录则算签到）
+if (DEITIES.some(d => getCount(d.id) > 0)) updateStreak();
+
 </script>
 </body>
 </html>
